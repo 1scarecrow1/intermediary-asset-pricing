@@ -11,8 +11,8 @@ OUTPUT_DIR = Path(config.OUTPUT_DIR)
 import load_nyfed
 
 # Obtain the historical list of primary dealers as of Feb 2014.
-df_2000s = load_nyfed.load_nyfed(url=load_nyfed.url, data_dir=DATA_DIR, 
-                           save_cache=False, sheet_name = '2000s')
+df_2000s = load_nyfed.load_nyfed_primary_dealers_list(url=load_nyfed.url, data_dir=DATA_DIR, 
+                           save_cache=True, sheet_name = '2000s')
 df_2000s = df_2000s.drop(index=[0,1])
 df_2000s.reset_index(drop=True, inplace=True)
 
@@ -23,8 +23,8 @@ df_2014 = df_2000s.iloc[:22,14].to_frame(name='Primary Dealer')
 
 
 # Obtain the start and end date of primary dealers.
-df_dealer_alpha = load_nyfed.load_nyfed(url=load_nyfed.url, data_dir=DATA_DIR, 
-                           save_cache=False, sheet_name = 'Dealer Alpha')
+df_dealer_alpha = load_nyfed.load_nyfed_primary_dealers_list(url=load_nyfed.url, data_dir=DATA_DIR, 
+                           save_cache=True, sheet_name = 'Dealer Alpha')
 df_dealer_alpha.drop(index=0, inplace=True)
 df_dealer_alpha.reset_index(drop=True, inplace=True)
 
