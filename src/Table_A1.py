@@ -1,4 +1,5 @@
 import pandas as pd
+
 import numpy as np
 import datetime as datetime
 
@@ -27,6 +28,7 @@ df_dealer_alpha['End Date'] = df_dealer_alpha['End Date'].apply(lambda x: x.strf
 df_dealer_alpha['End Date'].fillna('Current', inplace=True)
 df_dealer_alpha = df_dealer_alpha.iloc[0:167]
 df_dealer_alpha.sort_values(by='Primary Dealer', inplace=True)
+
 
 
 
