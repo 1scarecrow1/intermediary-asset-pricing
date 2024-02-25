@@ -43,6 +43,8 @@ series_descriptions = {
     'NFCI': 'Chicago Fed National Financial Conditions Index',
     'GDP':'Gross Domestic Product',
     'GDPC1':' Real Gross Domestic Product',
+    'BOGZ1FL664090005Q': 'Security Brokers and Dealers; Total Financial Assets, Level',
+    'BOGZ1FL664190005Q': 'Security Brokers and Dealers; Total Liabilities, Level',
 }
 
 def load_fred_macro_data(
