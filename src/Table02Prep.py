@@ -15,41 +15,61 @@ Also creates a summary statistics table and figure in LaTeX format.
 Performs unit tests to observe similarity to original table as well as other standard tests.
 """
 
-def fetch_financial_data(db, pgvkey, start_date, end_date):
+def fetch_financial_data(db, linktable, start_date, end_date, ITERATE=False):
     """
-    Fetch financial data for a given ticker and date range from the CCM database in WRDS.
+    Fetch financial data for given tickers and date ranges from the CCM database in WRDS.
     :param db: the established connection to the WRDS database
-    :param gvkey: The gvkey symbol for the company.
+    :param linktable: DataFrame containing gvkeys and optionally start and end dates.
     :param start_date: The start date for the data in YYYY-MM-DD format.
     :param end_date: The end date for the data in YYYY-MM-DD format or 'Current'.
+    :param ITERATE: Boolean indicating whether to use unique dates for each gvkey.
     :return: A DataFrame containing the financial data.
     """
-    if not pgvkey:  # Skip if no ticker is available
-        return pd.DataFrame()
+    pgvkeys = linktable['gvkey'].tolist()
+    results = pd.DataFrame()
 
-    # If the end date is 'Current', replace it with today's date
-    if end_date == 'Current':
-        end_date = datetime.today().strftime('%Y-%m-%d')
+    if ITERATE:
+        start_dates = linktable['Start Date'].tolist()
+        end_dates = linktable['End Date'].tolist()
+        end_date_parts = end_date.split("-")
+        end_date = f"{end_date_parts[1]}/{end_date_parts[2]}/{end_date_parts[0]}"
+        # Convert 'Current' to actual end date and parse dates
+        end_dates = [end_date if date == 'Current' else date for date in end_dates]
+        start_dates = [datetime.strptime(date, '%m/%d/%Y') for date in start_dates]
+        end_dates = [datetime.strptime(date, '%m/%d/%Y') for date in end_dates]
 
-    # Convert dates to the correct format if necessary
-    start_date = pd.to_datetime(start_date).strftime('%Y-%m-%d')
-    end_date = pd.to_datetime(end_date).strftime('%Y-%m-%d')
-    pgvkey_str = ','.join([f"'{str(key).zfill(6)}'" for key in pgvkey])
-    query = f"""
-    SELECT datadate, at AS total_assets, lt AS book_debt, teq AS book_equity, csho*prcc_f AS market_equity, gvkey, conm
-    FROM comp.funda as cst
-    WHERE cst.gvkey IN ({pgvkey_str})
-    AND cst.datadate BETWEEN '{start_date}' AND '{end_date}'
-    AND indfmt='INDL'
-    AND datafmt='STD'
-    AND popsrc='D'
-    AND consol='C'
-    """
-    data = db.raw_sql(query)
-    return data
+        for i, gvkey in enumerate(pgvkeys):
+            pgvkey_str = f"'{str(gvkey).zfill(6)}'"
+            query = f"""
+            SELECT datadate, CASE WHEN at IS NULL OR at = 0 THEN act ELSE at END AS total_assets, CASE WHEN lt IS NULL OR lt = 0 THEN lct ELSE lt END AS book_debt,  CASE WHEN teq IS NULL OR teq = 0 THEN seq ELSE teq END AS book_equity, csho*prcc_f AS market_equity, gvkey, conm
+            FROM comp.funda as cst
+            WHERE cst.gvkey={pgvkey_str}
+            AND cst.datadate BETWEEN '{start_dates[i]}' AND '{end_dates[i]}'
+            AND indfmt='INDL'
+            AND datafmt='STD'
+            AND popsrc='D'
+            AND consol='C'
+            """
+            data = db.raw_sql(query)
+            results = pd.concat([results, data], axis=0)
+    else:
+        pgvkey_str = ','.join([f"'{str(key).zfill(6)}'" for key in pgvkeys])
+        query = f"""
+        SELECT datadate, CASE WHEN at IS NULL OR at = 0 THEN act ELSE at END AS total_assets, CASE WHEN lt IS NULL OR lt = 0 THEN lct ELSE lt END AS book_debt,  CASE WHEN teq IS NULL OR teq = 0 THEN seq ELSE teq END AS book_equity, csho*prcc_f AS market_equity, gvkey, conm
+        FROM comp.funda as cst
+        WHERE cst.gvkey IN ({pgvkey_str})
+        AND cst.datadate BETWEEN '{start_date}' AND '{end_date}'
+        AND indfmt='INDL'
+        AND datafmt='STD'
+        AND popsrc='D'
+        AND consol='C'
+        """
+        results = db.raw_sql(query)
+
+    return results
 
 
-def get_comparison_group_data(db, linktable_df, start_date, end_date):
+def get_comparison_group_data(db, linktable_df, start_date, end_date, ITERATE=False):
     """
     Reads in manual datasets containing tickers and link table information.
 
@@ -65,14 +85,15 @@ def get_comparison_group_data(db, linktable_df, start_date, end_date):
     Example:
     - ticks_df, linktable_df = read_in_manual_datasets()
     """
-    return fetch_financial_data(db, linktable_df['gvkey'].tolist(), start_date, end_date)
+    return fetch_financial_data(db, linktable_df, start_date, end_date, ITERATE=ITERATE)
+
 
 
 def read_in_manual_datasets():
     ticks = pd.read_csv('../data/manual/ticks.csv', sep="|")
     ticks['gvkey'] = ticks['gvkey'].fillna(0.0).astype(int)
     ticks['Permco'] = ticks['Permco'].fillna(0.0).astype(int)
-    linktable = pd.read_csv('../data/manual/linktable.csv')
+    linktable = pd.read_csv('../data/manual/updated_linktable.csv')
     return ticks, linktable
 
 
@@ -103,7 +124,7 @@ def pull_CRSP_Comp_Link_Table():
     return ccm
 
 
-def prim_deal_merge_manual_data_w_linktable():
+def prim_deal_merge_manual_data_w_linktable(UPDATED=False):
     """
        Merges the main dataset with the link table for primary dealer identification.
 
@@ -118,7 +139,11 @@ def prim_deal_merge_manual_data_w_linktable():
        """
     # link_hist = pull_CRSP_Comp_Link_Table() Commented out until fix connection issue
     main_dataset, link_hist = read_in_manual_datasets()
-    merged_main = pd.merge(main_dataset, link_hist, left_on='gvkey', right_on='gvkey')
+    if not UPDATED:
+        link_hist = link_hist[link_hist['fyear'] <= 2012]
+    merged_main = pd.merge(main_dataset, link_hist, left_on='gvkey', right_on='GVKEY')
+    merged_main = merged_main[['gvkey','conm','sic','Start Date','End Date']].drop_duplicates()
+    link_hist.rename(columns={'GVKEY':'gvkey'},inplace=True)
     return merged_main, link_hist
 
 
@@ -145,7 +170,7 @@ def create_comparison_group_linktables(link_hist, merged_main):
     return {"BD": linked_bd_less_pd, "Banks": linked_banks_less_pd, "Cmpust.": linked_all_less_pd, "PD": merged_main}
 
 
-def pull_data_for_all_comparison_groups(db, comparison_group_dict):
+def pull_data_for_all_comparison_groups(db, comparison_group_dict, UPDATED=False):
     """
     Pulls data for all comparison groups specified in the given dictionary from the database.
 
@@ -164,7 +189,18 @@ def pull_data_for_all_comparison_groups(db, comparison_group_dict):
     """
     datasets = {}
     for key, linktable in comparison_group_dict.items():
-        datasets[key] = get_comparison_group_data(db, linktable, config.START_DATE, config.END_DATE).drop_duplicates()
+        if key == 'PD':
+            ITERATE = True
+        else:
+            ITERATE = False
+        if not UPDATED:
+            datasets[key] = get_comparison_group_data(db, linktable, config.START_DATE, config.END_DATE, ITERATE=ITERATE).drop_duplicates()
+        else:
+            if pd.to_datetime(config.UPDATED_END_DATE) > datetime.now():
+                UPDATED_END_DATE = datetime.now().strftime('%Y-%m-%d')
+            else:
+                UPDATED_END_DATE = config.UPDATED_END_DATE
+            datasets[key] = get_comparison_group_data(db, linktable, config.START_DATE, UPDATED_END_DATE, ITERATE=ITERATE).drop_duplicates()
     return datasets
 
 
@@ -186,7 +222,7 @@ def prep_datasets(datasets):
         dataset['datadate'] = pd.to_datetime(dataset['datadate']).dt.year.astype(str) + '-01-01'
         # Convert back to datetime format
         dataset['datadate'] = pd.to_datetime(dataset['datadate'])
-
+        dataset.fillna(0, inplace=True)
         # Group by 'datadate' and sum the other columns
         summed = dataset.groupby('datadate').agg({
             'total_assets': 'sum',
@@ -195,12 +231,13 @@ def prep_datasets(datasets):
             'market_equity': 'sum'
         }).reset_index()
 
+
         prepped_datasets[key] = summed
 
     return prepped_datasets
 
 
-def create_ratios_for_table(prepped_datasets):
+def create_ratios_for_table(prepped_datasets, UPDATED=False):
     """
     Creates ratio dataframes for each period based on prepped datasets.
 
@@ -214,11 +251,18 @@ def create_ratios_for_table(prepped_datasets):
     - prepped_datasets = {'PD': primary_dealer_data, 'Other': other_data}
     - combined_ratio_df = create_ratios_for_table(prepped_datasets)
     """
-    sample_periods = [
+    if not UPDATED:
+        sample_periods = [
         ('1960-01-01', '2012-12-31'),
         ('1960-01-01', '1990-12-31'),
         ('1990-01-01', '2012-12-31')
     ]
+    else:
+        sample_periods = [
+            ('1960-01-01', '2024-02-29'),
+            ('1960-01-01', '1990-12-31'),
+            ('1990-01-01', '2024-02-29')
+        ]
     primary_dealer_set = prepped_datasets['PD']
     del prepped_datasets['PD']
 
@@ -247,7 +291,7 @@ def create_ratios_for_table(prepped_datasets):
             for column in ['total_assets', 'book_debt', 'book_equity', 'market_equity']:
                 sum_column = filtered_sets[period][column] + filtered_dataset[column]
                 # Avoid division by zero
-                sum_column = sum_column.replace(0, pd.NA)
+                sum_column = sum_column.replace(0, np.nan)
                 ratio_dataframes[period][f'{column}_{key}'] = filtered_sets[period][column] / sum_column
 
     # Combine the ratio dataframes for each period into one dataframe
@@ -260,7 +304,7 @@ def create_ratios_for_table(prepped_datasets):
     return combined_ratio_df
 
 
-def format_final_table(table):
+def format_final_table(table, UPDATED=False):
     """
     Formats the final table by grouping the data by 'Period', calculating the mean,
     and creating a DataFrame with a MultiIndex for columns.
@@ -302,12 +346,16 @@ def format_final_table(table):
     )
 
     # Reorder the index if necessary
-    new_order = ['1960-2012', '1960-1990', '1990-2012']
+    if UPDATED:
+        new_order = ['1960-2024', '1960-1990', '1990-2024']
+    else:
+        new_order = ['1960-2012', '1960-1990', '1990-2012']
+
     formatted_table = formatted_table.reindex(new_order)
     return formatted_table
 
 
-def convert_and_export_table_to_latex(formatted_table):
+def convert_and_export_table_to_latex(formatted_table, UPDATED=False):
     """
     Converts a formatted table to LaTeX format and exports it to a .tex file.
     """
@@ -338,10 +386,14 @@ def convert_and_export_table_to_latex(formatted_table):
     """
 
     # Write the full LaTeX code to a .tex file
-    with open('../output/table02.tex', 'w') as f:
-        f.write(full_latex)
+    if UPDATED:
+        with open('../output/updated_table02.tex', 'w') as f:
+            f.write(full_latex)
+    else:
+        with open('../output/table02.tex', 'w') as f:
+            f.write(full_latex)
 
-def main():
+def main(UPDATED=False):
     """
     Main function to execute the entire data processing pipeline.
 
@@ -349,15 +401,15 @@ def main():
     - formatted_table (pandas.DataFrame): DataFrame containing the formatted table.
     """
     db = wrds.Connection(wrds_username=config.WRDS_USERNAME)
-    merged_main, link_hist = prim_deal_merge_manual_data_w_linktable()
+    merged_main, link_hist = prim_deal_merge_manual_data_w_linktable(UPDATED=UPDATED)
     comparison_group_link_dict = create_comparison_group_linktables(link_hist, merged_main)
-    datasets = pull_data_for_all_comparison_groups(db, comparison_group_link_dict)
+    datasets = pull_data_for_all_comparison_groups(db, comparison_group_link_dict, UPDATED=UPDATED)
     prepped_datasets = prep_datasets(datasets)
-    Table02Analysis.create_summary_stat_table_for_data(datasets)
-    table = create_ratios_for_table(prepped_datasets)
-    Table02Analysis.create_figure_for_data(table)
-    formatted_table = format_final_table(table)
-    convert_and_export_table_to_latex(formatted_table)
+    Table02Analysis.create_summary_stat_table_for_data(datasets,UPDATED=UPDATED)
+    table = create_ratios_for_table(prepped_datasets,UPDATED=UPDATED)
+    Table02Analysis.create_figure_for_data(table,UPDATED=UPDATED)
+    formatted_table = format_final_table(table, UPDATED=UPDATED)
+    convert_and_export_table_to_latex(formatted_table,UPDATED=UPDATED)
     return formatted_table
 
 

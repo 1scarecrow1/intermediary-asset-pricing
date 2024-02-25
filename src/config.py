@@ -27,6 +27,7 @@ OUTPUT_DIR = config('OUTPUT_DIR', default=(BASE_DIR / 'output'), cast=Path)
 WRDS_USERNAME = config("WRDS_USERNAME", default="")
 START_DATE = config('START_DATE', default='')
 END_DATE = config('END_DATE', default='')
+UPDATED_END_DATE = config('UPDATED_END_DATE', default='')
 
 if __name__ == "__main__":
     

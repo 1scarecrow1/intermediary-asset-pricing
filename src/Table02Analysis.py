@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def create_summary_stat_table_for_data(datasets):
+def create_summary_stat_table_for_data(datasets, UPDATED=False):
     summary_df = pd.DataFrame()
     for key in datasets.keys():
         dataset = datasets[key].drop(columns=['datadate'])
@@ -23,10 +23,14 @@ def create_summary_stat_table_for_data(datasets):
     caption = 'There are significantly less entries for book equity than the other measures as shown in the count rows. There are also some negatives for book equity which is not present for other categories. '
     latex_table = summary_df.to_latex(index=True, multirow=True, multicolumn=True, escape=False, float_format="%.2f", caption=caption, label='tab:Table 2.1')
     latex_table = latex_table.replace(r'\multirow[t]{5}{*}', '')
-    with open('../output/table02_sstable.tex', 'w') as f:
-        f.write(latex_table)
+    if UPDATED:
+        with open('../output/updated_table02_sstable.tex', 'w') as f:
+            f.write(latex_table)
+    else:
+        with open('../output/table02_sstable.tex', 'w') as f:
+            f.write(latex_table)
 
-def create_figure_for_data(ratios_dict):
+def create_figure_for_data(ratios_dict, UPDATED=False):
     concatenated_df = pd.concat([s.rename(f"{key}_{s.name}") for key, s in ratios_dict.items()], axis=1)
 
     concatenated_df.sort_index(inplace=True)
@@ -62,6 +66,9 @@ def create_figure_for_data(ratios_dict):
         ax.set_xlabel('Date')  # Set x-axis label for each subplot
         ax.set_ylabel('Value')  # Set y-axis label for each subplot
         # Add caption
-    fig.text(0.5, -0.05, 'Common Caption for All Graphs', ha='center', fontsize=12)
+    fig.text(0.5, -0.05, 'From the plots above we can observe the trends of the ratios for each comparison group over time. Keep in mind that we have filled in missing values to make the lines display properly.', ha='center', fontsize=8)
     plt.tight_layout()
-    plt.savefig('../output/table02_figure.png')
+    if UPDATED:
+        plt.savefig('../output/updated_table02_figure.png')
+    else:
+        plt.savefig('../output/table02_figure.png')
