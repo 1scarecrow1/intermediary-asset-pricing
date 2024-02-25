@@ -41,24 +41,29 @@ df_dealer_alpha['End Date'] = df_dealer_alpha['End Date'].fillna('Current')
 
 
 # Match primary dealer in the list with start date
-df_2014['Primary_Dealer_Temp'] = df_2014['Primary Dealer'].str.strip().str.replace(r'\.$', '', regex=True).str.replace(' ', '')
-df_dealer_alpha['Primary_Dealer_Temp'] = df_dealer_alpha['Primary Dealer'].str.strip().str.replace(r'\.$', '', regex=True).str.replace(' ', '')
-df_dealer_alpha = df_dealer_alpha.sort_values(by='Start Date')
-df_dealer_alpha = df_dealer_alpha.drop_duplicates(subset='Primary_Dealer_Temp', keep='last')
-merged_df = pd.merge(df_2014, df_dealer_alpha[['Primary_Dealer_Temp', 'Start Date']],
+df_2014_temp = df_2014.copy()
+df_dealer_alpha_temp = df_dealer_alpha.copy()
+df_2014_temp['Primary_Dealer_Temp'] = df_2014_temp['Primary Dealer'].str.strip().str.replace(r'\.$', '', regex=True).str.replace(' ', '')
+df_dealer_alpha_temp['Primary_Dealer_Temp'] = df_dealer_alpha_temp['Primary Dealer'].str.strip().str.replace(r'\.$', '', regex=True).str.replace(' ', '')
+df_dealer_alpha_temp = df_dealer_alpha_temp.sort_values(by='Start Date')
+df_dealer_alpha_temp = df_dealer_alpha_temp.drop_duplicates(subset='Primary_Dealer_Temp', keep='last')
+merged_df = pd.merge(df_2014_temp, df_dealer_alpha_temp[['Primary_Dealer_Temp', 'Start Date']],
                     on='Primary_Dealer_Temp', how='left')
 merged_df.drop(columns=['Primary_Dealer_Temp'],inplace=True)
 merged_df['Start Date'] = pd.to_datetime(merged_df['Start Date'])
 merged_df.sort_values(by='Start Date', inplace=True)
+merged_df.reset_index(drop=True, inplace=True)
 
 
 # Add matching primary dealer in the list with holding company
-ticks = pd.read_csv('ticks.csv', sep="|")
+ticks = pd.read_csv('../data/manual/ticks.csv', sep="|")
 ticks = ticks.iloc[:,:2]
-ticks['Primary_Dealer_Temp'] = ticks['Primary Dealer'].str.strip().str.replace(r'\.$', '', regex=True).str.replace(' ', '')
-merged_df['Primary_Dealer_Temp'] = merged_df['Primary Dealer'].str.strip().str.replace(r'\.$', '', regex=True).str.replace(' ', '')
-ticks = ticks.drop_duplicates(subset='Primary_Dealer_Temp', keep='last')
-merged_df_final = pd.merge(merged_df, ticks[['Primary_Dealer_Temp', 'Holding Company']],
+ticks_temp = ticks.copy()
+merged_df_temp = merged_df.copy()
+ticks_temp['Primary_Dealer_Temp'] = ticks_temp['Primary Dealer'].str.strip().str.replace(r'\.$', '', regex=True).str.replace(' ', '')
+merged_df_temp['Primary_Dealer_Temp'] = merged_df_temp['Primary Dealer'].str.strip().str.replace(r'\.$', '', regex=True).str.replace(' ', '')
+ticks_temp = ticks_temp.drop_duplicates(subset='Primary_Dealer_Temp', keep='last')
+merged_df_final = pd.merge(merged_df_temp, ticks_temp[['Primary_Dealer_Temp', 'Holding Company']],
                     on='Primary_Dealer_Temp', how='left')
 merged_df_final.drop(columns=['Primary_Dealer_Temp'],inplace=True)
 merged_df_final['Start Date'] = pd.to_datetime(merged_df_final['Start Date'])
