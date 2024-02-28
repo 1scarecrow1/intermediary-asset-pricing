@@ -42,11 +42,18 @@ series_descriptions = {
     'UNRATE': 'Unemployment Rate (Seasonally Adjusted)',
     'NFCI': 'Chicago Fed National Financial Conditions Index',
     'GDP':'Gross Domestic Product',
-    'GDPC1':' Real Gross Domestic Product',
+    'A191RL1Q225SBEA':' Real Gross Domestic Product Growth',
     'BOGZ1FL664090005Q': 'Security Brokers and Dealers; Total Financial Assets, Level',
     'BOGZ1FL664190005Q': 'Security Brokers and Dealers; Total Liabilities, Level',
 }
 
+def resample_quarterly(df):
+    """
+    Resample the data to quarterly frequency
+    """
+    df = df.resample('Q').mean()
+    return df
+    
 def load_fred_macro_data(
     data_dir=DATA_DIR,
     from_cache=True,
@@ -75,7 +82,7 @@ def load_fred_macro_data(
     df = df.resample('Q').mean()
     
     df = df[df.index >= "1970-01-01"]
-    df.info()
+    # df.info()
     # df = pd.read_parquet(file_path)
     return df
 
@@ -86,4 +93,8 @@ def demo():
 if __name__ == "__main__":
     # Pull and save cache of fred data
     _ = load_fred(start="1913-01-01", end="2023-10-01", 
+        data_dir=DATA_DIR, from_cache=False, save_cache=True)
+    
+    # pull and save cache of macroeconomic data
+    _ = load_fred_macro_data(start="1970-01-01", end="2024-01-01", 
         data_dir=DATA_DIR, from_cache=False, save_cache=True)
