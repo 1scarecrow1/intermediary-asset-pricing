@@ -41,8 +41,8 @@ def fetch_financial_data(db, linktable, start_date, end_date, ITERATE=False):
         for i, gvkey in enumerate(pgvkeys):
             pgvkey_str = f"'{str(gvkey).zfill(6)}'"
             query = f"""
-            SELECT datadate, CASE WHEN at IS NULL OR at = 0 THEN act ELSE at END AS total_assets, CASE WHEN lt IS NULL OR lt = 0 THEN lct ELSE lt END AS book_debt,  CASE WHEN teq IS NULL OR teq = 0 THEN seq ELSE teq END AS book_equity, csho*prcc_f AS market_equity, gvkey, conm
-            FROM comp.funda as cst
+            SELECT datadate, CASE WHEN atq IS NULL OR atq = 0 THEN actq ELSE atq END AS total_assets, CASE WHEN ltq IS NULL OR ltq = 0 THEN lctq ELSE ltq END AS book_debt,  COALESCE(teqq, ceqq + COALESCE(pstkq, 0) + COALESCE(mibnq, 0)) AS book_equity, cshoq*prccq AS market_equity, gvkey, conm
+            FROM comp.fundq as cst
             WHERE cst.gvkey={pgvkey_str}
             AND cst.datadate BETWEEN '{start_dates[i]}' AND '{end_dates[i]}'
             AND indfmt='INDL'
@@ -51,12 +51,13 @@ def fetch_financial_data(db, linktable, start_date, end_date, ITERATE=False):
             AND consol='C'
             """
             data = db.raw_sql(query)
-            results = pd.concat([results, data], axis=0)
+            if not data.empty:
+                results = pd.concat([results, data], axis=0)
     else:
         pgvkey_str = ','.join([f"'{str(key).zfill(6)}'" for key in pgvkeys])
         query = f"""
-        SELECT datadate, CASE WHEN at IS NULL OR at = 0 THEN act ELSE at END AS total_assets, CASE WHEN lt IS NULL OR lt = 0 THEN lct ELSE lt END AS book_debt,  CASE WHEN teq IS NULL OR teq = 0 THEN seq ELSE teq END AS book_equity, csho*prcc_f AS market_equity, gvkey, conm
-        FROM comp.funda as cst
+        SELECT datadate, CASE WHEN atq IS NULL OR atq = 0 THEN actq ELSE atq END AS total_assets, CASE WHEN ltq IS NULL OR ltq = 0 THEN lctq ELSE ltq END AS book_debt,  COALESCE(teqq, ceqq + COALESCE(pstkq, 0) + COALESCE(mibnq, 0)) AS book_equity, cshoq*prccq AS market_equity, gvkey, conm
+        FROM comp.fundq as cst
         WHERE cst.gvkey IN ({pgvkey_str})
         AND cst.datadate BETWEEN '{start_date}' AND '{end_date}'
         AND indfmt='INDL'
@@ -218,11 +219,14 @@ def prep_datasets(datasets):
     prepped_datasets = {}
     for key in datasets.keys():
         dataset = datasets[key]
-        # Convert 'datadate' to datetime, extract year, convert to string and append '-01-01'
-        dataset['datadate'] = pd.to_datetime(dataset['datadate']).dt.year.astype(str) + '-01-01'
-        # Convert back to datetime format
-        dataset['datadate'] = pd.to_datetime(dataset['datadate'])
-        dataset.fillna(0, inplace=True)
+        if 'datadate' in dataset.columns:
+            # Convert 'datadate' to Timestamp objects
+            dataset['datadate'] = pd.to_datetime(dataset['datadate'])
+            # Convert 'datadate' to quarterly periods and then to timestamp
+            dataset['datadate'] = dataset['datadate'].dt.to_period('Q').dt.to_timestamp()
+            dataset.fillna(0, inplace=True)
+        else:
+            print("'datadate' column not found in the dataset")
         # Group by 'datadate' and sum the other columns
         summed = dataset.groupby('datadate').agg({
             'total_assets': 'sum',
@@ -230,7 +234,6 @@ def prep_datasets(datasets):
             'book_equity': 'sum',
             'market_equity': 'sum'
         }).reset_index()
-
 
         prepped_datasets[key] = summed
 
