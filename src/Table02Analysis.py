@@ -37,8 +37,8 @@ def create_figure_for_data(ratios_dict, UPDATED=False):
 
     concatenated_df = concatenated_df.apply(pd.to_numeric, errors='coerce')
 
-    concatenated_df.fillna(method='ffill', inplace=True)
-    concatenated_df.fillna(method='bfill', inplace=True)
+    concatenated_df.ffill(inplace=True)
+    concatenated_df.bfill(inplace=True)
 
     asset_columns = [col for col in concatenated_df.columns if 'total_assets' in col]
     debt_columns = [col for col in concatenated_df.columns if 'book_debt' in col]
@@ -50,7 +50,7 @@ def create_figure_for_data(ratios_dict, UPDATED=False):
     equity_colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red']
     market_colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red']
 
-    fig, axes = plt.subplots(2, 2, figsize=(10, 8), sharex=True)
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
     for ax, columns, colors, category in zip(axes.flatten(),
                                              [asset_columns, debt_columns, equity_columns, market_columns],
                                              [asset_colors, debt_colors, equity_colors, market_colors],
@@ -66,7 +66,8 @@ def create_figure_for_data(ratios_dict, UPDATED=False):
         ax.set_xlabel('Date')  # Set x-axis label for each subplot
         ax.set_ylabel('Value')  # Set y-axis label for each subplot
         # Add caption
-    fig.text(0.5, -0.05, 'From the plots above we can observe the trends of the ratios for each comparison group over time. Keep in mind that we have filled in missing values to make the lines display properly.', ha='center', fontsize=8)
+    time = datetime.now()
+    fig.text(0.5, -0.05, str(time) + ': From the plots above we can observe the trends of the ratios for each comparison group over time. Keep in mind that we have filled in missing values to make the lines display properly.', ha='center', fontsize=8)
     plt.tight_layout()
     if UPDATED:
         plt.savefig('../output/updated_table02_figure.png')
