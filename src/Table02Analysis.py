@@ -6,7 +6,9 @@ import unittest
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+"""
+Is referenced by Table02Prep. Creates tables to understand the data and figures to understand the different ratios.
+"""
 def create_summary_stat_table_for_data(datasets, UPDATED=False):
     summary_df = pd.DataFrame()
     for key in datasets.keys():

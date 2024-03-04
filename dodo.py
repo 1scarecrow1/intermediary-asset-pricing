@@ -25,6 +25,20 @@ def task_table02_main():
         'actions': [create_original_table, create_updated_table],
         'verbosity': 2,
     }
+def task_create_latex_document():
+    original_dir = os.getcwd()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Define a wrapper function for your action that resets the directory afterwards
+    def create_latex_doc():
+        os.chdir(os.path.join(current_dir, "src"))
+        os.system('python -c "import sys; sys.path.insert(0, \'src\'); import LaTeXDocGenerator"')
+        os.chdir(original_dir)  # Reset the directory back to the original after the action is done
+
+    return {
+        'actions': [create_latex_doc],
+        'verbosity': 2,
+    }
 
 
 
