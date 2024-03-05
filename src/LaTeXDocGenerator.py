@@ -32,6 +32,7 @@ files = [
     "updated_table02_sstable.tex",
     "updated_table02.tex",
     "updated_table02_figure.png",
+    "table03_writeup01.txt"
 ]
 
 # Function to read content from a file
@@ -78,16 +79,21 @@ def tex_to_pdf(tex_file_path):
         print(f"The file {tex_file_path} does not exist.")
         return
 
-    # Run pdflatex command
-    process = subprocess.run(['pdflatex', tex_file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    try:
+        # Run pdflatex command with a timeout of 60 seconds
+        process = subprocess.run(['pdflatex', tex_file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=60)
 
-    # Check if pdflatex command ran successfully
-    if process.returncode == 0:
-        print(f"PDF generated successfully: {tex_file_path.replace('.tex', '.pdf')}")
-    else:
-        print(f"Failed to generate PDF. Here's the error:")
-        print(process.stdout)
-        print(process.stderr)
+        # Check if pdflatex command ran successfully
+        if process.returncode == 0:
+            print(f"PDF generated successfully: {tex_file_path.replace('.tex', '.pdf')}")
+        else:
+            print(f"Failed to generate PDF. Here's the error:")
+            print(process.stdout)
+            print(process.stderr)
+    except subprocess.TimeoutExpired:
+        print("pdflatex command timed out.")
+
+tex_to_pdf(r'..\output\combined_document.tex')
 
 tex_to_pdf('..\output\combined_document.tex')
 
