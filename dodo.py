@@ -25,6 +25,47 @@ def task_table02_main():
         'actions': [create_original_table, create_updated_table],
         'verbosity': 2,
     }
+
+def task_pullnyfed_main():
+    original_dir = os.getcwd()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Define a wrapper function for your action that resets the directory afterwards
+    def pull_nyfed():
+        os.chdir(os.path.join(current_dir, "src"))
+        os.system('python -c "import sys; sys.path.insert(0, \'src\'); import load_nyfed; load_nyfed.pull_nyfed_primary_dealers_list(load_nyfed.url)"')
+        os.chdir(original_dir)  # Reset the directory back to the original after the action is done
+    return {
+        'actions': [pull_nyfed],
+        'verbosity': 2,
+    }
+def task_table01_main():
+    original_dir = os.getcwd()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Define a wrapper function for your action that resets the directory afterwards
+    def create_table01():
+        os.chdir(os.path.join(current_dir, "src"))
+        os.system('python -c "import sys; sys.path.insert(0, \'src\'); import Table_01"')
+        os.chdir(original_dir)  # Reset the directory back to the original after the action is done
+    return {
+        'actions': [create_table01],
+        'verbosity': 2,
+    }
+def task_tableA1_main():
+    original_dir = os.getcwd()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Define a wrapper function for your action that resets the directory afterwards
+    def create_tableA1():
+        os.chdir(os.path.join(current_dir, "src"))
+        os.system('python -c "import sys; sys.path.insert(0, \'src\'); import Table_A1"')
+        os.chdir(original_dir)  # Reset the directory back to the original after the action is done
+    return {
+        'actions': [create_tableA1],
+        'verbosity': 2,
+    }
+
 def task_create_latex_document():
     original_dir = os.getcwd()
     current_dir = os.path.dirname(os.path.abspath(__file__))
