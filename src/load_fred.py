@@ -42,6 +42,7 @@ series_descriptions = {
     'UNRATE': 'Unemployment Rate (Seasonally Adjusted)',
     'NFCI': 'Chicago Fed National Financial Conditions Index',
     'GDP':'Gross Domestic Product',
+    'GDPC1':'Real Gross Domestic Product',
     'A191RL1Q225SBEA':' Real Gross Domestic Product Growth',
     'BOGZ1FL664090005Q': 'Security Brokers and Dealers; Total Financial Assets, Level',
     'BOGZ1FL664190005Q': 'Security Brokers and Dealers; Total Liabilities, Level',
