@@ -38,16 +38,6 @@ def load_fred(
     return df
 
 
-series_descriptions = {
-    'UNRATE': 'Unemployment Rate (Seasonally Adjusted)',
-    'NFCI': 'Chicago Fed National Financial Conditions Index',
-    'GDP':'Gross Domestic Product',
-    'GDPC1':'Real Gross Domestic Product',
-    'A191RL1Q225SBEA':' Real Gross Domestic Product Growth',
-    'BOGZ1FL664090005Q': 'Security Brokers and Dealers; Total Financial Assets, Level',
-    'BOGZ1FL664190005Q': 'Security Brokers and Dealers; Total Liabilities, Level',
-}
-
 def resample_quarterly(df):
     """
     Resample the data to quarterly frequency
@@ -55,12 +45,27 @@ def resample_quarterly(df):
     df = df.resample('Q').mean()
     return df
     
+
+
+macro_series_descriptions = {
+    'UNRATE': 'Unemployment Rate (Seasonally Adjusted)',
+    'NFCI': 'Chicago Fed National Financial Conditions Index',
+    'GDP':'Gross Domestic Product',
+    'GDPC1':'Real Gross Domestic Product',
+    'A191RL1Q225SBEA':' Real Gross Domestic Product Growth',
+}
+
+fred_bd_series_descriptions = {
+    'BOGZ1FL664090005Q': 'Security Brokers and Dealers; Total Financial Assets, Level',
+    'BOGZ1FL664190005Q': 'Security Brokers and Dealers; Total Liabilities, Level',
+}
+
 def load_fred_macro_data(
     data_dir=DATA_DIR,
     from_cache=True,
     save_cache=False,
     start="1970-01-01",
-    end="2024-01-01",
+    end="2024-02-29",
 ):
     """
     Load macroeconomic data from FRED or from a local cache and converts it to a quarterly format.
@@ -70,7 +75,7 @@ def load_fred_macro_data(
         df = pd.read_parquet(file_path)
     else:
         # Use the series keys as needed for macroeconomic data
-        series_keys = list(series_descriptions.keys())
+        series_keys = list(macro_series_descriptions.keys())
         df = pandas_datareader.get_data_fred(series_keys, start=start, end=end)
         if save_cache:
             file_dir = Path(data_dir) / "pulled"
@@ -82,9 +87,36 @@ def load_fred_macro_data(
         df.index = pd.to_datetime(df.index)
     df = df.resample('Q').mean()
     
-    df = df[df.index >= "1970-01-01"]
-    # df.info()
-    # df = pd.read_parquet(file_path)
+    return df
+
+
+def load_fred_bd_data(
+    data_dir=DATA_DIR,
+    from_cache=True,
+    save_cache=False,
+    start="1970-01-01",
+    end="2024-02-29",
+):
+    """
+    Load macroeconomic data from FRED or from a local cache and converts it to a quarterly format.
+    """
+    if from_cache:
+        file_path = Path(data_dir) / "pulled" / "fred_macro.parquet"
+        df = pd.read_parquet(file_path)
+    else:
+        # Use the series keys as needed for macroeconomic data
+        series_keys = list(fred_bd_series_descriptions.keys())
+        df = pandas_datareader.get_data_fred(series_keys, start=start, end=end)
+        if save_cache:
+            file_dir = Path(data_dir) / "pulled"
+            file_dir.mkdir(parents=True, exist_ok=True)
+            df.to_parquet(file_dir / 'fred_bd.parquet')
+
+    # Resample to quarterly if data is not from cache or if needed
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df.index = pd.to_datetime(df.index)
+    df = df.resample('Q').mean()
+    
     return df
 
 def demo():
