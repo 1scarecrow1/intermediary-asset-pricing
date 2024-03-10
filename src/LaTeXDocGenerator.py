@@ -28,14 +28,14 @@ files = [
     "table02_writeup01.txt",
     # "table02_sstable.tex",
     "table02.tex",
-    "table02_figure.png",
-    "table02_writeup02.txt",
-    # "updated_table02_sstable.tex",
     "updated_table02.tex",
+    "table02_writeup02.txt",
+    "table02_figure.png",
     "updated_table02_figure.png",
     "table03_writeup01.txt",
     "table03.tex",
-    "updated_table03.tex"
+    "updated_table03.tex",
+    "conclusion.txt"
 ]
 def escape_latex_special_chars(text):
     # List of LaTeX special characters that need to be escaped

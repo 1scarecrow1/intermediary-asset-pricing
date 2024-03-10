@@ -102,7 +102,6 @@ def task_create_latex_document():
     }
 
 
-import os
 
 import os
 import subprocess
