@@ -60,7 +60,7 @@ fred_bd_series_descriptions = {
 }
 
 def pull_fred_macro_data(data_dir=DATA_DIR, 
-                         start="1970-01-01", end="2024-02-29"):
+                         start="1969-01-01", end="2024-02-29"):
     try:
         series_keys = list(macro_series_descriptions.keys())
         df = pandas_datareader.data.get_data_fred(series_keys, start=start, end=end)
@@ -73,7 +73,7 @@ def pull_fred_macro_data(data_dir=DATA_DIR,
         print(f"Failed to pull or save FRED macro data: {e}")
 
 def load_fred_macro_data(data_dir=DATA_DIR, from_cache=True, 
-                         start="1970-01-01", end="2024-02-29"):
+                         start="1969-01-01", end="2024-02-29"):
     file_path = Path(data_dir) / "pulled" / "fred_macro.parquet"
     try:
         if from_cache and file_path.exists():
@@ -89,7 +89,7 @@ def load_fred_macro_data(data_dir=DATA_DIR, from_cache=True,
 
 
 def pull_fred_bd_data(data_dir=DATA_DIR, 
-                         start="1970-01-01", end="2024-02-29"):
+                         start="1969-01-01", end="2024-02-29"):
     try:
         series_keys = list(fred_bd_series_descriptions.keys())
         df = pandas_datareader.data.get_data_fred(series_keys, start=start, end=end)
@@ -102,7 +102,7 @@ def pull_fred_bd_data(data_dir=DATA_DIR,
         print(f"Failed to pull or save FRED macro data: {e}")
 
 def load_fred_bd_data(data_dir=DATA_DIR, from_cache=True, 
-                         start="1970-01-01", end="2024-02-29"):
+                         start="1969-01-01", end="2024-02-29"):
     file_path = Path(data_dir) / "pulled" / "fred_bd.parquet"
     try:
         if from_cache and file_path.exists():
@@ -127,5 +127,5 @@ if __name__ == "__main__":
         data_dir=DATA_DIR, from_cache=False, save_cache=True)
     
     # pull and save cache of macroeconomic data
-    _ = load_fred_macro_data(start="1970-01-01", end="2024-01-01", 
+    _ = load_fred_macro_data(start="1969-01-01", end="2024-01-01", 
         data_dir=DATA_DIR, from_cache=False, save_cache=True)

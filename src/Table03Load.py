@@ -1,9 +1,6 @@
 import pandas as pd
-import wrds
 import config
 from datetime import datetime
-import matplotlib.pyplot as plt
-import numpy as np
 
 import requests
 import pandas_datareader.data as web
@@ -22,6 +19,7 @@ DATA_DIR = Path(config.DATA_DIR)
 URL_FRED_2013 = "https://www.federalreserve.gov/releases/z1/20130307/Disk/ltabs.zip"
 URL_SHILLER = "https://img1.wsimg.com/blobby/go/e5e77e0b-59d1-44d9-ab25-4763ac982e53/downloads/ie_data.xls"
 
+
 def date_to_quarter(date):
     """
     Convert a date to a fiscal quarter in the format 'YYYYQ#'.
@@ -39,6 +37,79 @@ def quarter_to_date(quarter):
     quarter = int(quarter[-1])
     month = quarter * 3 
     return datetime(year, month, 1) + pd.DateOffset(months=1) - pd.DateOffset(days=1)
+
+
+def fetch_financial_data_quarterly(gvkey, start_date, end_date, db):
+    """
+    Fetch financial data for a given ticker and date range from the CCM database in WRDS.
+    
+    :param gvkey: The gvkey symbol for the company.
+    :param start_date: The start date for the data in YYYY-MM-DD format.
+    :param end_date: The end date for the data in YYYY-MM-DD format or 'Current'.
+    :return: A DataFrame containing the financial data.
+    """
+
+    if not gvkey:  # Skip if no ticker is available
+        return pd.DataFrame()
+    
+    # Convert 'Current' to today's date if necessary
+    if end_date == 'Current':
+        end_date = datetime.today().strftime('%Y-%m-%d')
+    
+    # Convert start and end dates to datetime objects
+    start_date_dt = pd.to_datetime(start_date)
+    end_date_dt = pd.to_datetime(end_date)
+    
+    # Format start and end quarters
+    start_qtr = date_to_quarter(start_date_dt)
+    end_qtr = date_to_quarter(end_date_dt)
+
+    query = f"""
+    SELECT datafqtr, atq AS total_assets, ltq AS book_debt, 
+            COALESCE(teqq, ceqq + COALESCE(pstkq, 0) + COALESCE(mibnq, 0)) AS book_equity, 
+            cshoq*prccq AS market_equity, gvkey, conm
+    FROM comp.fundq as cst
+    WHERE cst.gvkey = '{str(gvkey).zfill(6)}'
+    AND cst.datafqtr BETWEEN '{start_qtr}' AND '{end_qtr}'
+    AND indfmt='INDL'
+    AND datafmt='STD'
+    AND popsrc='D'
+    AND consol='C'
+    """
+    data = db.raw_sql(query)
+
+    return data
+
+
+def fetch_data_for_tickers(ticks, db):
+    """
+    Function to fetch financial data for a list of tickers.
+
+    Parameters:
+    ticks (DataFrame): DataFrame containing ticker information including gvkey, start date, and end date.
+
+    Returns:
+    prim_dealers (DataFrame): DataFrame containing fetched financial data.
+    empty_tickers (list): List of tickers for which no data could be fetched.
+    """
+
+    empty_tickers = []
+    prim_dealers = pd.DataFrame()
+
+    # Iterate over DataFrame rows and fetch data for each ticker
+    for index, row in ticks.iterrows():
+        gvkey = row['gvkey']
+        start_date = row['Start Date']
+        end_date = row['End Date']  # Formatting date for the query
+
+        # Fetch financial data for the ticker if available
+        new_data = fetch_financial_data_quarterly(gvkey, start_date, end_date, db)
+        if isinstance(new_data, tuple):
+            empty_tickers.append({row['Ticker']: gvkey})
+        else:
+            prim_dealers = pd.concat([new_data, prim_dealers], axis=0)
+    
+    return prim_dealers, empty_tickers
 
 
 def load_macro_data():
@@ -120,7 +191,7 @@ def load_fred_past(url=URL_FRED_2013,
 
         df.index = df.index.astype(str)
         df.index = df.index.str[:4] + 'Q' + df.index.str[5]
-        df = df.loc['1969Q4':'2012Q4']
+        df = df.loc['1968Q4':'2012Q4']
         df.index = df.index.to_series().apply(quarter_to_date)
         df.index.name = 'datafqtr'
 
@@ -205,7 +276,7 @@ def pull_CRSP_Value_Weighted_Index(db):
     sql_query = """
         SELECT date, vwretd
         FROM crsp.msi as msi
-        WHERE msi.date >= '1970-01-01' AND msi.date <= '2024-02-29'
+        WHERE msi.date >= '1969-01-01' AND msi.date <= '2024-02-29'
         """
     
     data = db.raw_sql(sql_query, date_cols=["date"])
