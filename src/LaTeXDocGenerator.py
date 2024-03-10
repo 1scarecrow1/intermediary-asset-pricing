@@ -13,6 +13,7 @@ latex_document = [
     "\\usepackage{geometry}",
     "\\geometry{left=1in, right=1in, top=1in, bottom=1in}",  # Adjust margins as needed
     "\\usepackage{adjustbox}",
+    "\\usepackage{booktabs}",
     "\\begin{document}",
 ]
 
@@ -25,15 +26,35 @@ files = [
     "tableA1_writeup.txt",
     "Table_A1_to_latex.tex",
     "table02_writeup01.txt",
-    "table02_sstable.tex",
+    # "table02_sstable.tex",
     "table02.tex",
     "table02_figure.png",
     "table02_writeup02.txt",
-    "updated_table02_sstable.tex",
+    # "updated_table02_sstable.tex",
     "updated_table02.tex",
     "updated_table02_figure.png",
-    "table03_writeup01.txt"
+    "table03_writeup01.txt",
+    "table03.tex",
+    "updated_table03.tex"
 ]
+def escape_latex_special_chars(text):
+    # List of LaTeX special characters that need to be escaped
+    special_chars = {
+        '&': r'\&',
+        '%': r'\%',
+        '$': r'\$',
+        '#': r'\#',
+        '_': r'\_',
+        '{': r'\{',
+        '}': r'\}',
+        '~': r'\textasciitilde{}',
+        '^': r'\textasciicircum{}',
+        '\\': r'\textbackslash{}',
+    }
+    # Escape each special character in the text
+    for char, escaped_char in special_chars.items():
+        text = text.replace(char, escaped_char)
+    return text
 
 # Function to read content from a file
 def read_content(filename):
@@ -44,18 +65,20 @@ def read_content(filename):
 for filename in files:
     if filename.endswith('.tex'):  # For .tex files, include the content directly
         content = read_content(filename)
-        if 'tabular' in content:  # Check if this is a table
-            content = "\\begin{adjustbox}{max width=\\textwidth}\n" + content + "\\end{adjustbox}\n"
+        # if 'tabular' in content:  # Check if this is a table
+        #     content = "\\begin{adjustbox}{max width=\\textwidth}\n" + content + "\\end{adjustbox}\n"
         latex_document.append(content)
     elif filename.endswith('.txt'):  # For .txt files, add a new paragraph
         content = read_content(filename)
+        # Escape special LaTeX characters in the content
+        content = escape_latex_special_chars(content)
         latex_document.append("\\par\n" + content + "\\par\n")
     elif filename.endswith('.png'):  # For image files, include the figure
         latex_document.append(
             "\\begin{figure}[htbp]"
             "\\centering"
             "\\includegraphics[width=\\linewidth]{" + filename + "}"
-            "\\caption{}"  # Add your caption here
+            # "\\caption{}"  # Add your caption here
             "\\end{figure}"
             "\\par"  # Ensure separation
         )
@@ -95,5 +118,5 @@ def tex_to_pdf(tex_file_path):
 #
 # tex_to_pdf(r'..\output\combined_document.tex')
 #
-# tex_to_pdf('..\output\combined_document.tex')
+
 
