@@ -5,13 +5,12 @@ from datetime import datetime
 import unittest
 import matplotlib.pyplot as plt
 import numpy as np
-import load_CRSP_stock
 
 from statsmodels.tsa.ar_model import AutoReg
 from statsmodels.tsa.seasonal import seasonal_decompose
 
 from Table03Prep import *
-from Table02Prep import prim_deal_merge_manual_data_w_linktable, convert_and_export_table_to_latex
+from Table02Prep import prim_deal_merge_manual_data_w_linktable
 
 """
 Reads in manual dataset for primary dealers and holding companies and matches it with linkhist entry for company. 
@@ -21,7 +20,7 @@ Performs unit tests to observe similarity to original table as well as other sta
 """
 
 
-def fetch_financial_data_quarterly(gvkey, start_date, end_date):
+def fetch_financial_data_quarterly(gvkey, start_date, end_date, db):
     """
     Fetch financial data for a given ticker and date range from the CCM database in WRDS.
     
@@ -63,7 +62,7 @@ def fetch_financial_data_quarterly(gvkey, start_date, end_date):
     return data
 
 
-def fetch_data_for_tickers(ticks):
+def fetch_data_for_tickers(ticks, db):
     """
     Function to fetch financial data for a list of tickers.
 
@@ -85,7 +84,7 @@ def fetch_data_for_tickers(ticks):
         end_date = row['End Date']  # Formatting date for the query
 
         # Fetch financial data for the ticker if available
-        new_data = fetch_financial_data_quarterly(gvkey, start_date, end_date)
+        new_data = fetch_financial_data_quarterly(gvkey, start_date, end_date, db)
         if isinstance(new_data, tuple):
             empty_tickers.append({row['Ticker']: gvkey})
         else:
@@ -209,7 +208,7 @@ def calculate_ep(shiller_cape):
     
     return df
 
-def macro_variables():
+def macro_variables(db):
     macro_data = load_fred_macro_data()
     macro_data = macro_data.rename(columns={'UNRATE': 'unemp_rate',
                                     'NFCI': 'nfci',
@@ -227,7 +226,7 @@ def macro_variables():
     ff_facs = fetch_ff_factors(start_date='19700101', end_date='20240229')
     ff_facs_quarterly = ff_facs.to_timestamp(freq='M').resample('Q').last()
 
-    value_wtd_indx = pull_CRSP_Value_Weighted_Index()
+    value_wtd_indx = pull_CRSP_Value_Weighted_Index(db)
     value_wtd_indx['date'] = pd.to_datetime(value_wtd_indx['date'])
     annual_vol_quarterly = value_wtd_indx.set_index('date')['vwretd'].pct_change().groupby(pd.Grouper(freq='Q')).std().rename('mkt_vol')
 
@@ -336,20 +335,22 @@ def format_final_table(corrA, corrB):
     return full_table
 
 def convert_and_export_tables_to_latex(corrA, corrB, UPDATED=False):
-    corrA = corrA.fillna('')
-    corrB = corrB.fillna('')
+    # Fill NaN values with empty strings for both tables
     
-    latexA = corrA.to_latex(index=True, column_format='lcccccccccccc', float_format="%.2f")
-    latexB = corrB.to_latex(index=True, column_format='lcccccccccccc', float_format="%.2f")
-
-    start_tabular_A = latexA.find("\\begin{tabular}")
-    end_tabular_A = latexA.find("\\end{tabular}") + len("\\end{tabular}")
-    tabular_content_A = latexA[start_tabular_A:end_tabular_A]
-
-    start_tabular_B = latexB.find("\\begin{tabular}")
-    end_tabular_B = latexB.find("\\end{tabular}") + len("\\end{tabular}")
-    tabular_content_B = latexB[start_tabular_B:end_tabular_B]
-
+    corrA = corrA.round(2).fillna('')
+    corrB = corrB.round(2).fillna('')
+    
+    # Convert the correlation tables to LaTeX format without using to_latex() directly to control the structure
+    # Define the column format and titles manually
+    column_format = 'l' + 'c' * (len(corrA.columns) - 1)
+    header_row = " & " + " & ".join(corrA.columns) + " \\\\"
+    
+    # Generate content rows for Panel A
+    panelA_rows = "\n".join([f"{index} & " + " & ".join(corrA.loc[index].astype(str)) + " \\\\" for index in corrA.index])
+    
+    # Generate content rows for Panel B, adjusting column names to match Panel A's format
+    panelB_rows = "\n".join([f"{index} & " + " & ".join(corrB.loc[index].astype(str)) + " \\\\" for index in corrB.index])
+    
     full_latex = rf"""
     \documentclass{{article}}
     \usepackage{{booktabs}} % For better-looking tables
@@ -358,15 +359,25 @@ def convert_and_export_tables_to_latex(corrA, corrB, UPDATED=False):
 
     \begin{{document}}
     \begin{{table}}[htbp]
-      \centering
-      \begin{{adjustbox}}{{max width=\textwidth}}
-      \small
-      Panel A: Correlation of Levels \\
-      {tabular_content_A}
-      \vspace{{2em}} 
-      Panel B: Correlation of Factors \\
-      {tabular_content_B}
-      \end{{adjustbox}}
+    \centering
+    \begin{{adjustbox}}{{max width=\textwidth}}
+    \small
+    \begin{{tabular}}{{{column_format}}}
+        \toprule
+        Panel A: Correlation of Levels \\
+        \midrule
+        {header_row}
+        \midrule
+        {panelA_rows}
+        \midrule
+        Panel B: Correlation of Factors \\
+        \midrule
+        {header_row}
+        \midrule
+        {panelB_rows}
+        \bottomrule
+    \end{{tabular}}
+    \end{{adjustbox}}
     \end{{table}}
     \end{{document}}
     """
@@ -378,6 +389,7 @@ def convert_and_export_tables_to_latex(corrA, corrB, UPDATED=False):
     else:
         with open('../output/table03.tex', 'w') as f:
             f.write(full_latex)
+
 
 
 # For plotting Figure 1 
@@ -403,16 +415,21 @@ def main(UPDATED=False):
     db = wrds.Connection(wrds_username=config.WRDS_USERNAME)
     
     prim_dealers, _ = prim_deal_merge_manual_data_w_linktable(UPDATED=UPDATED)
-    dataset, _ = fetch_data_for_tickers(prim_dealers)
-    prep_dataset = prep_dataset(dataset, UPDATED=UPDATED)
-    ratio_dataset = aggregate_ratios(prep_dataset)
+    dataset, _ = fetch_data_for_tickers(prim_dealers, db)
+    prep_datast = prep_dataset(dataset, UPDATED=UPDATED)
+    ratio_dataset = aggregate_ratios(prep_datast)
     factors_dataset = convert_ratios_to_factors(ratio_dataset)
-    macro_variables = macro_variables()
+    macro_dataset = macro_variables(db)
 
-    panelA = create_panelA(ratio_dataset, macro_variables)
-    panelB = create_panelB(factors_dataset, macro_variables)
+    panelA = create_panelA(ratio_dataset, macro_dataset)
+    panelB = create_panelB(factors_dataset, macro_dataset)
     correlation_panelA = calculate_correlation_panelA(panelA)
     correlation_panelB = calculate_correlation_panelB(panelB)
     formatted_table = format_final_table(correlation_panelA, correlation_panelB)
     convert_and_export_tables_to_latex(correlation_panelA, correlation_panelB, UPDATED=UPDATED)
-    return formatted_table.style.format(na_rep='')
+    formatted_table.style.format(na_rep='')
+
+
+if __name__ == "__main__":
+    main(UPDATED=True)
+    print("Table 03 has been created and exported to LaTeX format.")
