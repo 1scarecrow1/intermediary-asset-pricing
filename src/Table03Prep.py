@@ -64,11 +64,12 @@ def load_bd_financials():
     Returns:
     macro_data (DataFrame): DataFrame containing financial assets and liabilities of security brokers and dealers.
     """
-    bd_financials = load_fred_bd_data(from_cache=False, save_cache=True) 
+    bd_financials = load_fred_bd_data(from_cache=False) 
     bd_financials = bd_financials.rename(columns={'BOGZ1FL664090005Q': 'bd_fin_assets',
                                                   'BOGZ1FL664190005Q': 'bd_liabilities',
                                                   })    
     bd_financials.index = pd.to_datetime(bd_financials.index)
+    bd_financials = bd_financials.resample('Q').last()
     bd_financials.index.name = 'datafqtr'
 
     return bd_financials
@@ -190,7 +191,7 @@ def load_shiller_pe(url=URL_SHILLER, data_dir=DATA_DIR, from_cache=True):
     return df
 
 
-def pull_CRSP_Value_Weighted_Index(wrds_username=config.WRDS_USERNAME):
+def pull_CRSP_Value_Weighted_Index(db):
     """
     Pulls a value-weighted stock index from the CRSP database.
 
@@ -201,11 +202,10 @@ def pull_CRSP_Value_Weighted_Index(wrds_username=config.WRDS_USERNAME):
     This function executes a SQL query to retrieve the value-weighted stock index data from CRSP. 
     The returned DataFrame includes columns for 'date' and 'vwretd' (value-weighted return including dividends).
     """
-    db = wrds.Connection(wrds_username=wrds_username)
     sql_query = """
         SELECT date, vwretd
         FROM crsp.msi as msi
-        WHERE msi.date >= '1970-01-01' AND msi.date <= '2012-12-31'
+        WHERE msi.date >= '1970-01-01' AND msi.date <= '2024-02-29'
         """
     
     data = db.raw_sql(sql_query, date_cols=["date"])
