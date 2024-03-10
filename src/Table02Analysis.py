@@ -69,8 +69,9 @@ def create_figure_for_data(ratios_dict, UPDATED=False):
         ax.set_ylabel('Value')  # Set y-axis label for each subplot
         # Add caption
     time = datetime.now()
-    fig.text(0.5, -0.05, str(time) + ': From the plots above we can observe the trends of the ratios for each comparison group over time. Keep in mind that we have filled in missing values to make the lines display properly.', ha='center', fontsize=8)
-    plt.tight_layout()
+    caption = str(
+        time) + ': From the plots above we can observe the trends of the ratios for each comparison group over time. Keep in mind that we have filled in missing values to make the lines display properly.'
+    fig.text(0.5, -0.1, caption, ha='center', fontsize=8)
     if UPDATED:
         plt.savefig('../output/updated_table02_figure.png')
     else:

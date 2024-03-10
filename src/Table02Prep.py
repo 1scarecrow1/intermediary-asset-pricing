@@ -366,16 +366,20 @@ def convert_and_export_table_to_latex(formatted_table, UPDATED=False):
     Converts a formatted table to LaTeX format and exports it to a .tex file.
     """
     latex = formatted_table.to_latex(index=True, column_format='lcccccccccccc', float_format="%.3f")
-
+    if UPDATED:
+        caption = "Original"
+    else:
+        caption = "Updated"
     full_latex = r"""
     \begin{table}[htbp]
       \centering
-      \caption{Your table caption here}
+      \caption{""" + caption + """}
       \label{tab:Table 2}
       \small
       """ + latex + r"""
     \end{table}
     """
+
 
     # Write the full LaTeX code to a .tex file
     if UPDATED:
