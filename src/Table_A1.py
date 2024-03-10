@@ -29,7 +29,9 @@ df_dealer_alpha.reset_index(drop=True, inplace=True)
 
 df_dealer_alpha['Start Date'] = pd.to_datetime(df_dealer_alpha['Start Date']).dt.strftime('%-m/%-d/%Y')
 df_dealer_alpha['End Date'] = pd.to_datetime(df_dealer_alpha['End Date'], errors='coerce')
-df_dealer_alpha['End Date'] = df_dealer_alpha['End Date'].apply(lambda x: x.strftime('%-m/%-d/%Y') if pd.notnull(x) else x)
+df_dealer_alpha['End Date'] = df_dealer_alpha['End Date'].apply(
+    lambda x: x.strftime('%m/%d/%Y').lstrip("0").replace("/0", "/") if pd.notnull(x) else x
+)
 df_dealer_alpha['End Date'].fillna('Current', inplace=True)
 df_dealer_alpha = df_dealer_alpha.iloc[0:167]
 df_dealer_alpha.sort_values(by='Primary Dealer', inplace=True)

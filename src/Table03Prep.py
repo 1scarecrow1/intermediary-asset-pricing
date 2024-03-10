@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import requests
+import pandas_datareader.data as web
 from zipfile import ZipFile
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -19,6 +20,7 @@ Functions that pull and prepare the data for Table 03 in the intermediary asset 
 
 DATA_DIR = Path(config.DATA_DIR)
 URL_FRED_2013 = "https://www.federalreserve.gov/releases/z1/20130307/Disk/ltabs.zip"
+URL_SHILLER = "https://img1.wsimg.com/blobby/go/e5e77e0b-59d1-44d9-ab25-4763ac982e53/downloads/ie_data.xls"
 
 def date_to_quarter(date):
     """
@@ -49,7 +51,6 @@ def load_macro_data():
     macro_data = load_fred_macro_data() 
     macro_data = macro_data.rename(columns={'UNRATE': 'unemp_rate', 
                                             'NFCI': 'nfci', 
-                                            'GDP': 'nom_gdp', 
                                             'GDPC1': 'real_gdp', 
                                             'A191RL1Q225SBEA': 'real_gdp_growth',
                                             })    
@@ -135,8 +136,61 @@ def load_fred_past(url=URL_FRED_2013,
         print(f"Failed to download or process file: {e}")
 
 
+def fetch_ff_factors(start_date, end_date):
+    """
+    Fetches Fama-French research data factors, adjusts dates to end of the month,
+    resamples to quarterly frequency, and renames columns for ease of use.
+    
+    Parameters:
+    - start_date (str): The start date for fetching data in 'YYYYMMDD' format.
+    - end_date (str): The end date for fetching data in 'YYYYMMDD' format.
+    
+    Returns:
+    - DataFrame: A DataFrame containing the Fama-French factors, resampled quarterly,
+                 with 'Mkt-RF' column renamed to 'mkt_ret'.
+    """
+    rawdata = web.DataReader('F-F_Research_Data_5_Factors_2x3', data_source='famafrench', start=start_date, end=end_date)
+    ff_facs = rawdata[0] / 100
+    ff_facs.rename(columns={'Mkt-RF': 'mkt_ret'}, inplace=True)
+    
+    return ff_facs
 
-def pull_CRSP_Value_Weighted_Index():
+def pull_shiller_pe(url=URL_SHILLER, data_dir=DATA_DIR):
+    """
+    Download Shiller's S&P 500 P/E list from the website and save it to a cache.
+    """
+    print(f"Downloading and caching from {url}")
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            file_path = data_dir / "pulled" / "shiller_pe.xls"
+            file_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+            with open(file_path, 'wb') as file:
+                file.write(response.content)
+            print(f"Data saved to cache at {file_path}")
+        else:
+            response.raise_for_status()
+    except Exception as e:
+        print(f"Error downloading or saving the Shiller PE data: {e}")
+        raise
+
+def load_shiller_pe(url=URL_SHILLER, data_dir=DATA_DIR, from_cache=True):
+    """
+    Load Shiller PE data from cache or directly if cache is not available.
+    """
+    file_path = data_dir / "pulled" / "shiller_pe.xls"
+    if from_cache and file_path.exists():
+        print("Loading data from cache.")
+        df = pd.read_excel(file_path, sheet_name='Data', skiprows=7, usecols="A,M")
+    else:
+        print("Cache not found, pulling data...")
+        pull_shiller_pe(url, data_dir)
+        df = pd.read_excel(file_path, sheet_name='Data', skiprows=7, usecols="A,M")
+
+    return df
+
+
+def pull_CRSP_Value_Weighted_Index(wrds_username=config.WRDS_USERNAME):
     """
     Pulls a value-weighted stock index from the CRSP database.
 
@@ -147,7 +201,7 @@ def pull_CRSP_Value_Weighted_Index():
     This function executes a SQL query to retrieve the value-weighted stock index data from CRSP. 
     The returned DataFrame includes columns for 'date' and 'vwretd' (value-weighted return including dividends).
     """
-    
+    db = wrds.Connection(wrds_username=wrds_username)
     sql_query = """
         SELECT date, vwretd
         FROM crsp.msi as msi

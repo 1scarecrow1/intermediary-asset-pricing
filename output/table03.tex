@@ -1,0 +1,47 @@
+
+    \documentclass{article}
+    \usepackage{booktabs} % For better-looking tables
+    \usepackage{graphicx} % Required for inserting images
+    \usepackage{adjustbox} % Useful for adjusting table sizes
+
+    \begin{document}
+    \begin{table}[htbp]
+      \centering
+      \begin{adjustbox}{max width=\textwidth}
+      \small
+      Panel A: Correlation of Levels \\
+      \begin{tabular}{lcccccccccccc}
+\toprule
+ & Market capital & Book capital & AEM leverage \\
+\midrule
+Market capital &  & 0.44 & -0.10 \\
+Book capital &  &  & 0.48 \\
+AEM leverage &  &  &  \\
+E/P & -0.21 & 0.56 & 0.75 \\
+Unemployment &  &  &  \\
+GDP &  &  &  \\
+Financial conditions & 0.23 & 0.51 & 0.43 \\
+Market volatility & -0.04 & 0.06 & 0.11 \\
+\bottomrule
+\end{tabular}
+      \vspace{2em} 
+      Panel B: Correlation of Factors \\
+      \begin{tabular}{lcccccccccccc}
+\toprule
+ & Market capital factor & Book capital factor & AEM leverage factor \\
+\midrule
+Market capital factor &  & 0.44 & -0.11 \\
+Book capital factor &  &  & 0.11 \\
+AEM leverage factor &  &  &  \\
+Market excess return & -0.05 & 0.23 & 0.11 \\
+E/P growth & -0.45 & 0.01 & 0.24 \\
+Unemployment growth &  &  &  \\
+GDP growth &  &  &  \\
+Financial conditions growth & -0.87 & -0.53 & -0.07 \\
+Market volatility growth & -0.09 & 0.05 & -0.10 \\
+\bottomrule
+\end{tabular}
+      \end{adjustbox}
+    \end{table}
+    \end{document}
+    

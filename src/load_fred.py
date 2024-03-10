@@ -50,7 +50,6 @@ def resample_quarterly(df):
 macro_series_descriptions = {
     'UNRATE': 'Unemployment Rate (Seasonally Adjusted)',
     'NFCI': 'Chicago Fed National Financial Conditions Index',
-    'GDP':'Gross Domestic Product',
     'GDPC1':'Real Gross Domestic Product',
     'A191RL1Q225SBEA':' Real Gross Domestic Product Growth',
 }
@@ -60,64 +59,63 @@ fred_bd_series_descriptions = {
     'BOGZ1FL664190005Q': 'Security Brokers and Dealers; Total Liabilities, Level',
 }
 
-def load_fred_macro_data(
-    data_dir=DATA_DIR,
-    from_cache=True,
-    save_cache=False,
-    start="1970-01-01",
-    end="2024-02-29",
-):
-    """
-    Load macroeconomic data from FRED or from a local cache and converts it to a quarterly format.
-    """
-    if from_cache:
-        file_path = Path(data_dir) / "pulled" / "fred_macro.parquet"
-        df = pd.read_parquet(file_path)
-    else:
-        # Use the series keys as needed for macroeconomic data
+def pull_fred_macro_data(data_dir=DATA_DIR, 
+                         start="1970-01-01", end="2024-02-29"):
+    try:
         series_keys = list(macro_series_descriptions.keys())
-        df = pandas_datareader.get_data_fred(series_keys, start=start, end=end)
-        if save_cache:
-            file_dir = Path(data_dir) / "pulled"
-            file_dir.mkdir(parents=True, exist_ok=True)
-            df.to_parquet(file_dir / 'fred_macro.parquet')
+        df = pandas_datareader.data.get_data_fred(series_keys, start=start, end=end)
+        file_dir = Path(data_dir) / "pulled"
+        file_dir.mkdir(parents=True, exist_ok=True)
+        file_path = file_dir / 'fred_macro.parquet'
+        df.to_parquet(file_path)
+        print(f"Data pulled and saved to {file_path}")
+    except Exception as e:
+        print(f"Failed to pull or save FRED macro data: {e}")
 
-    # Resample to quarterly if data is not from cache or if needed
-    if not isinstance(df.index, pd.DatetimeIndex):
-        df.index = pd.to_datetime(df.index)
-    df = df.resample('Q').mean()
-    
-    return df
-
-
-def load_fred_bd_data(
-    data_dir=DATA_DIR,
-    from_cache=True,
-    save_cache=False,
-    start="1970-01-01",
-    end="2024-02-29",
-):
-    """
-    Load macroeconomic data from FRED or from a local cache and converts it to a quarterly format.
-    """
-    if from_cache:
-        file_path = Path(data_dir) / "pulled" / "fred_macro.parquet"
+def load_fred_macro_data(data_dir=DATA_DIR, from_cache=True, 
+                         start="1970-01-01", end="2024-02-29"):
+    file_path = Path(data_dir) / "pulled" / "fred_macro.parquet"
+    try:
+        if from_cache and file_path.exists():
+            df = pd.read_parquet(file_path)
+            print("Loaded data from cache.")
+        else:
+            raise FileNotFoundError
+    except FileNotFoundError:
+        print("Cache not found, pulling data...")
+        pull_fred_macro_data(data_dir=data_dir, start=start, end=end)
         df = pd.read_parquet(file_path)
-    else:
-        # Use the series keys as needed for macroeconomic data
-        series_keys = list(fred_bd_series_descriptions.keys())
-        df = pandas_datareader.get_data_fred(series_keys, start=start, end=end)
-        if save_cache:
-            file_dir = Path(data_dir) / "pulled"
-            file_dir.mkdir(parents=True, exist_ok=True)
-            df.to_parquet(file_dir / 'fred_bd.parquet')
-
-    # Resample to quarterly if data is not from cache or if needed
-    if not isinstance(df.index, pd.DatetimeIndex):
-        df.index = pd.to_datetime(df.index)
-    df = df.resample('Q').mean()
-    
     return df
+
+
+def pull_fred_bd_data(data_dir=DATA_DIR, 
+                         start="1970-01-01", end="2024-02-29"):
+    try:
+        series_keys = list(fred_bd_series_descriptions.keys())
+        df = pandas_datareader.data.get_data_fred(series_keys, start=start, end=end)
+        file_dir = Path(data_dir) / "pulled"
+        file_dir.mkdir(parents=True, exist_ok=True)
+        file_path = file_dir / 'fred_bd.parquet'
+        df.to_parquet(file_path)
+        print(f"Data pulled and saved to {file_path}")
+    except Exception as e:
+        print(f"Failed to pull or save FRED macro data: {e}")
+
+def load_fred_bd_data(data_dir=DATA_DIR, from_cache=True, 
+                         start="1970-01-01", end="2024-02-29"):
+    file_path = Path(data_dir) / "pulled" / "fred_bd.parquet"
+    try:
+        if from_cache and file_path.exists():
+            df = pd.read_parquet(file_path)
+            print("Loaded data from cache.")
+        else:
+            raise FileNotFoundError
+    except FileNotFoundError:
+        print("Cache not found, pulling data...")
+        pull_fred_bd_data(data_dir=data_dir, start=start, end=end)
+        df = pd.read_parquet(file_path)
+    return df
+
 
 def demo():
     df = load_fred()

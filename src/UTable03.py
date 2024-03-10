@@ -21,7 +21,7 @@ Performs unit tests to observe similarity to original table as well as other sta
 """
 
 
-def fetch_financial_data_quarterly(gvkey, start_date, end_date):
+def fetch_financial_data_quarterly(gvkey, start_date, end_date, db):
     """
     Fetch financial data for a given ticker and date range from the CCM database in WRDS.
     
@@ -63,7 +63,7 @@ def fetch_financial_data_quarterly(gvkey, start_date, end_date):
     return data
 
 
-def fetch_data_for_tickers(ticks):
+def fetch_data_for_tickers(ticks, db):
     """
     Function to fetch financial data for a list of tickers.
 
@@ -85,7 +85,7 @@ def fetch_data_for_tickers(ticks):
         end_date = row['End Date']  # Formatting date for the query
 
         # Fetch financial data for the ticker if available
-        new_data = fetch_financial_data_quarterly(gvkey, start_date, end_date)
+        new_data = fetch_financial_data_quarterly(gvkey, start_date, end_date, db)
         if isinstance(new_data, tuple):
             empty_tickers.append({row['Ticker']: gvkey})
         else:
@@ -400,17 +400,18 @@ def main(UPDATED=False):
     - formatted_table (pandas.DataFrame): DataFrame containing the formatted table.
     """
 
-    db = wrds.Connection(wrds_username=config.WRDS_USERNAME)
-    
-    prim_dealers, _ = prim_deal_merge_manual_data_w_linktable(UPDATED=UPDATED)
-    dataset, _ = fetch_data_for_tickers(prim_dealers)
-    prep_dataset = prep_dataset(dataset, UPDATED=UPDATED)
-    ratio_dataset = aggregate_ratios(prep_dataset)
-    factors_dataset = convert_ratios_to_factors(ratio_dataset)
-    macro_variables = macro_variables()
 
-    panelA = create_panelA(ratio_dataset, macro_variables)
-    panelB = create_panelB(factors_dataset, macro_variables)
+
+    prim_dealers, _ = prim_deal_merge_manual_data_w_linktable(UPDATED=UPDATED)
+    db = wrds.Connection(wrds_username=config.WRDS_USERNAME)
+    dataset, _ = fetch_data_for_tickers(prim_dealers, db)
+    prep_datast = prep_dataset(dataset, UPDATED=UPDATED)
+    ratio_dataset = aggregate_ratios(prep_datast)
+    factors_dataset = convert_ratios_to_factors(ratio_dataset)
+    macro_variabls = macro_variables()
+
+    panelA = create_panelA(ratio_dataset, macro_variabls)
+    panelB = create_panelB(factors_dataset, macro_variabls)
     correlation_panelA = calculate_correlation_panelA(panelA)
     correlation_panelB = calculate_correlation_panelB(panelB)
     formatted_table = format_final_table(correlation_panelA, correlation_panelB)
