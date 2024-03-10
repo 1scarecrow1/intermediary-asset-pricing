@@ -342,7 +342,7 @@ def convert_and_export_tables_to_latex(corrA, corrB, UPDATED=False):
     
     # Convert the correlation tables to LaTeX format without using to_latex() directly to control the structure
     # Define the column format and titles manually
-    column_format = 'l' + 'c' * (len(corrA.columns) - 1)
+    column_format = 'l' + 'c' * (len(corrA.columns))
     header_row = " & " + " & ".join(corrA.columns) + " \\\\"
     
     # Generate content rows for Panel A
@@ -352,12 +352,6 @@ def convert_and_export_tables_to_latex(corrA, corrB, UPDATED=False):
     panelB_rows = "\n".join([f"{index} & " + " & ".join(corrB.loc[index].astype(str)) + " \\\\" for index in corrB.index])
     
     full_latex = rf"""
-    \documentclass{{article}}
-    \usepackage{{booktabs}} % For better-looking tables
-    \usepackage{{graphicx}} % Required for inserting images
-    \usepackage{{adjustbox}} % Useful for adjusting table sizes
-
-    \begin{{document}}
     \begin{{table}}[htbp]
     \centering
     \begin{{adjustbox}}{{max width=\textwidth}}
@@ -379,7 +373,6 @@ def convert_and_export_tables_to_latex(corrA, corrB, UPDATED=False):
     \end{{tabular}}
     \end{{adjustbox}}
     \end{{table}}
-    \end{{document}}
     """
 
     # Write the full LaTeX code to a .tex file

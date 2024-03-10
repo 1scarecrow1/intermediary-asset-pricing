@@ -35,8 +35,11 @@ def fetch_financial_data(db, linktable, start_date, end_date, ITERATE=False):
         end_date = f"{end_date_parts[1]}/{end_date_parts[2]}/{end_date_parts[0]}"
         # Convert 'Current' to actual end date and parse dates
         end_dates = [end_date if date == 'Current' else date for date in end_dates]
-        start_dates = [datetime.strptime(date, '%m/%d/%Y') for date in start_dates]
-        end_dates = [datetime.strptime(date, '%m/%d/%Y') for date in end_dates]
+        start_dates = [datetime.strptime(date, '%m/%d/%Y') if len(date.split('/')[-1]) == 4
+                       else datetime.strptime(date, '%m/%d/%y') for date in start_dates]
+
+        end_dates = [datetime.strptime(date, '%m/%d/%Y') if len(date.split('/')[-1]) == 4
+                     else datetime.strptime(date, '%m/%d/%y') for date in end_dates]
 
         for i, gvkey in enumerate(pgvkeys):
             pgvkey_str = f"'{str(gvkey).zfill(6)}'"
@@ -114,7 +117,7 @@ def pull_CRSP_Comp_Link_Table():
         SELECT 
             gvkey, lpermco AS permco, linktype, linkprim, linkdt, linkenddt, tic
         FROM 
-            crsp.ccmxpf_linkhist
+            ccmlinktable
         WHERE 
             substr(linktype,1,1)='L' AND 
             (linkprim ='C' OR linkprim='P')
@@ -365,18 +368,12 @@ def convert_and_export_table_to_latex(formatted_table, UPDATED=False):
     latex = formatted_table.to_latex(index=True, column_format='lcccccccccccc', float_format="%.3f")
 
     full_latex = r"""
-    \usepackage{booktabs} % For better-looking tables
-    \usepackage{graphicx} % Required for inserting images
-    \usepackage{adjustbox} % Useful for adjusting table sizes
-
     \begin{table}[htbp]
       \centering
       \caption{Your table caption here}
-      \label{tab:yourlabel}
-      \begin{adjustbox}{max width=\textwidth}
+      \label{tab:Table 2}
       \small
       """ + latex + r"""
-      \end{adjustbox}
     \end{table}
     """
 
