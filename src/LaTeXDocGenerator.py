@@ -92,8 +92,8 @@ def tex_to_pdf(tex_file_path):
             print(process.stderr)
     except subprocess.TimeoutExpired:
         print("pdflatex command timed out.")
-
-tex_to_pdf(r'..\output\combined_document.tex')
-
-tex_to_pdf('..\output\combined_document.tex')
+#
+# tex_to_pdf(r'..\output\combined_document.tex')
+#
+# tex_to_pdf('..\output\combined_document.tex')
 

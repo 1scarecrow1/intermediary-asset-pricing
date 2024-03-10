@@ -8,6 +8,8 @@ from doit.tools import run_once
 from doit import create_after
 from doit import task
 import os
+import warnings
+warnings.filterwarnings("ignore")
 def task_table02_main():
     original_dir = os.getcwd()
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -46,7 +48,7 @@ def task_table01_main():
     # Define a wrapper function for your action that resets the directory afterwards
     def create_table01():
         os.chdir(os.path.join(current_dir, "src"))
-        os.system('python -c "import sys; sys.path.insert(0, \'src\'); import Table_01"')
+        os.system('python -c "import sys; sys.path.insert(0, \'src\'); import Table_01_to_latex"')
         os.chdir(original_dir)  # Reset the directory back to the original after the action is done
     return {
         'actions': [create_table01],
@@ -59,7 +61,7 @@ def task_tableA1_main():
     # Define a wrapper function for your action that resets the directory afterwards
     def create_tableA1():
         os.chdir(os.path.join(current_dir, "src"))
-        os.system('python -c "import sys; sys.path.insert(0, \'src\'); import Table_A1"')
+        os.system('python -c "import sys; sys.path.insert(0, \'src\'); import Table_A1_to_latex"')
         os.chdir(original_dir)  # Reset the directory back to the original after the action is done
     return {
         'actions': [create_tableA1],
@@ -79,6 +81,30 @@ def task_create_latex_document():
     return {
         'actions': [create_latex_doc],
         'verbosity': 2,
+    }
+
+def task_compile_latex_docs():
+    """Example plots"""
+    file_dep = [
+        "./output/combined_document.tex",
+    ]
+    file_output = [
+        "./reports/report_final.pdf",
+        "./reports/slides_final.pdf",
+    ]
+    targets = [file for file in file_output]
+
+    return {
+        "actions": [
+            "latexmk -xelatex -cd ./reports/report_example.tex",  # Compile
+            "latexmk -xelatex -c -cd ./reports/report_example.tex",  # Clean
+            "latexmk -xelatex -cd ./reports/slides_example.tex",  # Compile
+            "latexmk -xelatex -c -cd ./reports/slides_example.tex",  # Clean
+            # "latexmk -CA -cd ../reports/",
+        ],
+        "targets": targets,
+        "file_dep": file_dep,
+        "clean": True,
     }
 
 
