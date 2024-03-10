@@ -6,6 +6,12 @@ from pathlib import Path
 DATA_DIR = Path(config.DATA_DIR)
 OUTPUT_DIR = Path(config.OUTPUT_DIR)
 
+"""
+By importing Table_01.py into this script, the process begins with modifying the DataFrame to replace '&' 
+with '\&' throughout, ensuring LaTeX format compatibility. After this adjustment, the script proceeds to  
+create 'Table_01_to_latex.tex' in the output directory, effectively preparing the table for LaTeX inclusion.
+"""
+
 import Table_01
 
 df_copy = Table_01.merged_df_final.copy()
@@ -17,7 +23,6 @@ for col in df_copy.columns:
         df_copy[col] = df_copy[col].str.replace('&', '\\&', regex=False)
 
 latex_table_string = df_copy.to_latex(index=False, escape=False)
-print(latex_table_string)
 
 path = OUTPUT_DIR / f'Table_01_to_latex.tex'
 with open(path, "w") as text_file:

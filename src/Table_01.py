@@ -7,6 +7,12 @@ from pathlib import Path
 DATA_DIR = Path(config.DATA_DIR)
 OUTPUT_DIR = Path(config.OUTPUT_DIR)
 
+"""
+After loading the NY Fed primary dealer list Excel file, the process begins by obtaining the historical list of 
+primary dealers as of February 2014, including their start and end dates. The next step is to match each primary 
+dealer with their start date for accuracy. Subsequently, add these matched primary dealers along with their 
+holding companies into the list to replicate Table 01. 
+"""
 
 import load_nyfed
 

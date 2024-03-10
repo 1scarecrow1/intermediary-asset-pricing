@@ -6,6 +6,13 @@ from pathlib import Path
 DATA_DIR = Path(config.DATA_DIR)
 OUTPUT_DIR = Path(config.OUTPUT_DIR)
 
+"""
+Importing Table_01.py, this script uses 'Table_A1_to_latex.py' to format 'df_dealer_alpha' into LaTeX, 
+saving it as 'Table_A1_to_latex.tex' in the output directory. It replaces '&' with '\&' in company names 
+to avoid LaTeX errors and divides the primary dealer list at the midpoint for visual clarity, aligning 
+with Table A.1's format.
+"""
+
 import Table_A1
 
 df_copy = Table_A1.df_dealer_alpha.copy()

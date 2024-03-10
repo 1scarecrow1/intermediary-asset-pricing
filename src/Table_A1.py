@@ -8,6 +8,11 @@ from pathlib import Path
 DATA_DIR = Path(config.DATA_DIR)
 OUTPUT_DIR = Path(config.OUTPUT_DIR)
 
+"""
+After loading the NY Fed primary dealer list Excel file, clean the data from the 'Dealer Alpha' 
+worksheet to replicate Table A.1. This involves formatting dates and indicating companies that 
+are still active as primary dealers by marking 'Current' in their end date column.
+"""
 
 import load_nyfed
 
