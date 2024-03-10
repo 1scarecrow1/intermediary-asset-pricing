@@ -17,13 +17,12 @@ midpoint = len(df_copy) // 2
 df_first_half = df_copy.iloc[:midpoint].reset_index(drop=True)
 df_second_half = df_copy.iloc[midpoint:].reset_index(drop=True)
 
-# Adding a separator row for visual division
+# Adding a separator column for visual division
 df_combined = pd.concat([df_first_half, df_second_half], axis=1)
 df_combined.insert(3,'',np.nan)
 df_combined.fillna('',inplace=True)
 
 latex_table_string = df_combined.to_latex(index=False, escape=False)
-print(latex_table_string)
 
 path = OUTPUT_DIR / f'Table_A1_to_latex.tex'
 with open(path, "w") as text_file:
