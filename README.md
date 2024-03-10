@@ -1,9 +1,9 @@
-Project Title HERE
+Intermediary asset pricing: New evidence from many asset classes
 ==================
 
 # About this project
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Our project is based on the paper 'Intermediary asset pricing' by He, Kelly and Manela (2017), where the authors find that shocks to the equity capital ratio of financial intermediaries have significant explanatory power for cross-sectional variation in expected returns. We replicate Table 1 - the list of primary dealer companies, Table A1 - the historical list of primary dealer companies, Table2 - the average sizes of the dealer companies, and Table 3 - pairwise correlations of financial metrics. Data is collected from CRSP, Compustat and Datastream. 
 
 # Quick Start
 
