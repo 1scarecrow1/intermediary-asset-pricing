@@ -85,6 +85,32 @@ def task_table03_main():
         'actions': [create_table03, create_updated_table03],
         'verbosity': 2,
     }
+def task_pullfredpast_main():
+    original_dir = os.getcwd()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Define a wrapper function for your action that resets the directory afterwards
+    def pull_fredpast():
+        os.chdir(os.path.join(current_dir, "src"))
+        os.system('python -c "import sys; sys.path.insert(0, \'src\'); import Table03Load; Table03Load.load_fred_past(Table03Load.URL_FRED_2013)"')
+        os.chdir(original_dir)  # Reset the directory back to the original after the action is done
+    return {
+        'actions': [pull_fredpast],
+        'verbosity': 2,
+    }
+def task_pullshillerpe_main():
+    original_dir = os.getcwd()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Define a wrapper function for your action that resets the directory afterwards
+    def pull_shillerpe():
+        os.chdir(os.path.join(current_dir, "src"))
+        os.system('python -c "import sys; sys.path.insert(0, \'src\'); import Table03Load; Table03Load.load_shiller_pe()"')
+        os.chdir(original_dir)  # Reset the directory back to the original after the action is done
+    return {
+        'actions': [pull_shillerpe],
+        'verbosity': 2,
+    }
 
 def task_create_latex_document():
     original_dir = os.getcwd()
