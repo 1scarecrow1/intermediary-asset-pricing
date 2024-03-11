@@ -1,31 +1,10 @@
 Creation of Table A.1 writeup:
 
-1. For Table A.1, the author gathered a complete historical list of primary dealers with their start
-and end dates from 1960 to 2014 from the NY Fed's website and presented it in full within Table A.1. 
+For Table A.1, the author gathered a complete historical list of primary dealers with their start and end dates from 1960 to 2014 from the NY Fed's website and presented it in full within Table A.1. 
 
-2. To replicate this table, we initially loaded the NY Fed primary dealer list from a cached file, 
-focusing solely on the 'Dealer Alpha' worksheet. This worksheet provided details on all primary dealers 
-within the specified timeframe, including their start and end dates.
+To replicate this table, we initially loaded the NY Fed primary dealer list from a cached file, focusing solely on the 'Dealer Alpha' worksheet. This worksheet provided details on all primary dealers within the specified timeframe, including their start and end dates. When converting this data to LaTeX format using the to_latex() function, we had to carefully manage unescaped '&' symbols in company names. We also split the primary dealer list at the midpoint, inserting a separator column to mirror the layout seen in Table A.1. The resulting .tex file was saved in the output directory and utilized to accurately recreate the complete table in LaTeX for the report.
 
-3. When converting this data to LaTeX format using the to_latex() function, we had to carefully manage 
-unescaped '&' symbols in company names. We also split the primary dealer list at the midpoint, inserting 
-a separator column to mirror the layout seen in Table A.1. The resulting .tex file was saved in the output 
-directory and utilized to accurately recreate the complete table in LaTeX for the report.
-
-4. However, replicating Table A.1 faced certain limitations not encountered with Table 1. Although our 
-replication closely matched the original Table A.1 in terms of format, primary dealer listings, and the 
-accuracy of start and end dates, achieving an exact match was complicated by several factors:
-
-4-1.The original paper used shorter, abbreviated company names in a less consistent manner compared to Table 1, 
-unlike the NY Fed's Excel file which provided full names.
-
-4-2. The author consolidated the list by combining entries that, despite name changes, continued as primary 
-dealers. In contrast, the NY Fed's Excel file offered a more extensive list by capturing all dealers, 
-inclusive of their names pre- and post-change, leading to a greater total number of entries.
-
-4-3. The use of abbreviations and the author's approach to consolidating listings posed challenges for conducting 
-precise unit testing. The subjective nature of abbreviating primary dealer names and merging entries hindered a 
-straightforward comparison.
+However, replicating Table A.1 faced certain limitations not encountered with Table 1. Although our replication closely matched the original Table A.1 in terms of format, primary dealer listings, and the accuracy of start and end dates, achieving an exact match was complicated by several factors: The original paper used shorter, abbreviated company names in a less consistent manner compared to Table 1, unlike the NY Fed's Excel file which provided full names. The author consolidated the list by combining entries that, despite name changes, continued as primary dealers. In contrast, the NY Fed's Excel file offered a more extensive list by capturing all dealers, inclusive of their names pre- and post-change, leading to a greater total number of entries. The use of abbreviations and the author's approach to consolidating listings posed challenges for conducting precise unit testing. The subjective nature of abbreviating primary dealer names and merging entries hindered a straightforward comparison.
 
 
 
