@@ -14,14 +14,12 @@ latex_document = [
     "\\geometry{left=1in, right=1in, top=1in, bottom=1in}",  # Adjust margins as needed
     "\\usepackage{adjustbox}",
     "\\usepackage{booktabs}",
-    "\\begin{document}",
-    "\\usepackage{color}"
+    "\\begin{document}"
 ]
 
 # List of files in the order to be included
 files = [
     "title.tex",
-    "intro.txt",
     "table01_writeup.txt",
     "Report_Table_01.tex",
     "tableA1_writeup.txt",
@@ -77,7 +75,7 @@ for filename in files:
         content = read_content(filename)
         # Escape special LaTeX characters in the content
         content = escape_latex_special_chars(content)
-        latex_document.append("\\par\n" + content + "\\par\n")
+        latex_document.append("\\clearpage\n" + content + "\\clearpage\n")
     elif filename.endswith('.png'):  # For image files, include the figure
         latex_document.append(
             "\\begin{figure}[htbp]"

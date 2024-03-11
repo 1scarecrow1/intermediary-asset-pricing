@@ -18,25 +18,25 @@
 \fontsize{10}{12}\selectfont
 James, Young Jin Song, Jaehwa Youm, Monica Panigrahy, and Jacob Simeral
 }
-\par
+\clearpage
 
 For our project, we were tasked with replicating 4 tables from the paper Intermediary asset pricing: New evidence from many asset classes. This paper aims to show how shocks to the equity capital ratio of financial intermediaries, specifically Primary Dealer counterparties of the New York Federal Reserve, exhibit substantial explanatory power for cross-sectional variance in expected returns across diverse asset classes, indicating the pivotal role of intermediary capital risk factor in understanding asset pricing dynamics. We split our work up amongst our selves to accomplish this task. Jacob and Young Jin worked on Tables 1, 2, and A,1. Monica and Jaehwa worked on Table 03.
 We found some success in replicating some of the more recent numbers but found much difficulty in determining the exact methodology used by the original authors to determine which holding company to use. We had two different attempts at this, the first was to choose the holding company that held the primary dealer for the longest period of time in a specified period - this data is in ticks.csv. The second method was to use the current holding company for a given primary dealer - this data is in ticksv2.csv. The third, which we did not have time to do, would be to have sub-periods for each holding company of a given primary dealer, which would likely produce the most accurate results.
 To pull our data, we used the Compustat database through our WRDS subscription. Specifically, we used the quarterly fundamentals table from Compustat.
-\par
+\clearpage
 
-\par
+\clearpage
 Creation of Table 01 writeup:
 
 The author sourced the historical list of primary dealers from the NY Fed's website, matching these dealers with data on their publicly-traded holding companies from CRSP/Compustat for U.S. dealers or Datastream for foreign dealers. Table 1 presents primary dealer designations as of February 11, 2014.
 
 To replicate Table 1, we developed a code to automatically download the list of NY Fed primary dealers from the NYFed website, with an option to cache the list in an Excel file for future use. This cached list then serves as the starting point for the replication process.
 
-The replication begins with data from the Excel file, utilizing two worksheets: one listing the primary dealers as of February 2014 and another documenting all primary dealers from 1960 to 2014, including their start and end dates. We aligned the 2014 primary dealer list with their start dates, carefully addressing discrepancies between the two Excel sheets, such as extra spaces or punctuation differences.  For dealers that paused their operations and later resumed, we considered their most recent start date. The process includes adjustments for these variances to ensure alignment with the original table. Start dates are organized from the earliest to the most recent. The author manually matched dealers to their publicly-traded holding companies. For the replication, a 'ticks.csv' file was generated and stored in the 'data/manual' directory, containing the mapping between primary dealers and their holding companies. This mapping was then used to add an additional column to the 'merged\textbackslash{}_df' table, showing the holding company for each dealer. Prior to transitioning to the LaTeX format, we conducted unit testing to verify the accuracy of 'Primary Dealer' names and 'Start Dates' in Table\textbackslash{}_01.merged\textbackslash{}_df\textbackslash{}_final. This involved removing spaces and periods and applying specific naming exceptions to ensure the data matched expected results. Exceptions included renaming 'Bank of Nova Scotia, New York Agency' to 'Bank of Nova Scotia, NY Agency' and abbreviating 'Merrill Lynch, Pierce, Fenner \textbackslash{}& Smith Incorporated' to 'Merrill Lynch, Pierce, Fenner \textbackslash{}& Smith'. Finally, we converted the table into LaTeX format using the to\textbackslash{}_latex() function, saving it in the output directory. This .tex file was then used to create the complete table in LaTeX format for inclusion in the report, replicating the entire table accurately.
+The replication begins with data from the Excel file, utilizing two worksheets: one listing the primary dealers as of February 2014 and another documenting all primary dealers from 1960 to 2014, including their start and end dates. We aligned the 2014 primary dealer list with their start dates, carefully addressing discrepancies between the two Excel sheets, such as extra spaces or punctuation differences.  For dealers that paused their operations and later resumed, we considered their most recent start date. The process includes adjustments for these variances to ensure alignment with the original table. Start dates are organized from the earliest to the most recent. The author manually matched dealers to their publicly-traded holding companies. For the replication, a 'ticks.csv' file was generated and stored in the 'data/manual' directory, containing the mapping between primary dealers and their holding companies. This mapping was then used to add an additional column to the 'mergeddf' table, showing the holding company for each dealer. Prior to transitioning to the LaTeX format, we conducted unit testing to verify the accuracy of 'Primary Dealer' names and 'Start Dates' in Table01.mergeddffinal. This involved removing spaces and periods and applying specific naming exceptions to ensure the data matched expected results. Exceptions included renaming 'Bank of Nova Scotia, New York Agency' to 'Bank of Nova Scotia, NY Agency' and abbreviating 'Merrill Lynch, Pierce, Fenner \textbackslash{}& Smith Incorporated' to 'Merrill Lynch, Pierce, Fenner \textbackslash{}& Smith'. Finally, we converted the table into LaTeX format using the tolatex() function, saving it in the output directory. This .tex file was then used to create the complete table in LaTeX format for inclusion in the report, replicating the entire table accurately.
 
 Replicating Table 1 was a straightforward task, with the main challenge being to resolve name discrepancies across two worksheets. These discrepancies arose from differences in spacing, punctuation, periods, abbreviations, and variations between lowercase and uppercase in the data sourced from the NY Fed website. After addressing these factors, Table 1 successfully matched with the original data.
 
-\par
+\clearpage
 
 \small {\section{Replication - Table 1}}
 \noindent{\footnotesize%
@@ -51,12 +51,12 @@ Primary dealers, as designated by the NY Fed serve as its trading counterparties
 \end{adjustbox}
 \end{table}
 
-\par
+\clearpage
 Creation of Table A.1 writeup:
 
 For Table A.1, the author gathered a complete historical list of primary dealers with their start and end dates from 1960 to 2014 from the NY Fed's website and presented it in full within Table A.1. 
 
-To replicate this table, we initially loaded the NY Fed primary dealer list from a cached file, focusing solely on the 'Dealer Alpha' worksheet. This worksheet provided details on all primary dealers within the specified timeframe, including their start and end dates. When converting this data to LaTeX format using the to\textbackslash{}_latex() function, we had to carefully manage unescaped '\textbackslash{}&' symbols in company names. We also split the primary dealer list at the midpoint, inserting a separator column to mirror the layout seen in Table A.1. The resulting .tex file was saved in the output directory and utilized to accurately recreate the complete table in LaTeX for the report.
+To replicate this table, we initially loaded the NY Fed primary dealer list from a cached file, focusing solely on the 'Dealer Alpha' worksheet. This worksheet provided details on all primary dealers within the specified timeframe, including their start and end dates. When converting this data to LaTeX format using the tolatex() function, we had to carefully manage unescaped symbols in company names. We also split the primary dealer list at the midpoint, inserting a separator column to mirror the layout seen in Table A.1. The resulting .tex file was saved in the output directory and utilized to accurately recreate the complete table in LaTeX for the report.
 
 However, replicating Table A.1 faced certain limitations not encountered with Table 1. Although our replication closely matched the original Table A.1 in terms of format, primary dealer listings, and the accuracy of start and end dates, achieving an exact match was complicated by several factors: The original paper used shorter, abbreviated company names in a less consistent manner compared to Table 1, unlike the NY Fed's Excel file which provided full names. The author consolidated the list by combining entries that, despite name changes, continued as primary dealers. In contrast, the NY Fed's Excel file offered a more extensive list by capturing all dealers, inclusive of their names pre- and post-change, leading to a greater total number of entries. The use of abbreviations and the author's approach to consolidating listings posed challenges for conducting precise unit testing. The subjective nature of abbreviating primary dealer names and merging entries hindered a straightforward comparison.
 
@@ -64,7 +64,7 @@ However, replicating Table A.1 faced certain limitations not encountered with Ta
 
 
 
-\par
+\clearpage
 
 \small {\section{Replication - Table A.1}}
 \noindent{\footnotesize% 
@@ -78,14 +78,14 @@ entries that differ due to name changes but maintain continuity in primary deale
 \input{\PathToOutput/Table_A1_to_latex.tex}
 \end{adjustbox}
 \end{table}
-\par
+\clearpage
 
 Table 2 was the first table our group was tasked with replicating. This table involves getting numbers such as total assets or market equity from CRSP Compustat database for different groups of firms, with the limitation that the firms be US domestic and have data available in CRSP Compustat. These groups were comprised of the primary dealers of the New York Fed, which are detailed in table A.1, all broker dealers, all banks, and all firms in Compustat. There were three time ranges that we observed, 1960-2012, 1960-1990, and 1990-2012. Replicating table 2 turned out to be a lot more involved than initially expected, due largely to the condition that we use the data of holding companies of the primary dealers rather than of the actual primary dealer. This required us to manually go through each individual dealer in the list of 112, and look up information about their holding company during a specified time period where they were considered a primary dealer. This was not a simple task because there were many cases where holding companies shifted multiple time within the specified period - forcing us to try and guess how the original author of the paper made this decision.
 
 After finishing the main lookup file, ticks.csv, which including all primary dealers listed in table A.1, their holding companies, their start and end dates, and their permcos and gvkeys (identifiers for CRSP and Compustat respectively) we then focused on pulling data from the WRDS database. After establishing a connection with WRDS we were able to query data from multiple sources. We made use of the CRSP Compustat historical link table to do most of this research, as well as some holding companies lookups on Google and chatGPT. We queried a full list of link table data from the WRDS website and downloaded it in Excel format to be able to filter and make notes. We also queried the link table from the WRDS historical table and used this table to help merge SIC codes with our completed ticks.csv dataset. For the financials dataset, we opted to query data by gvkey since the data for table 2 was specifically for company level financials which are found through Compustat.
 
 After having the primary dealer data in the proper format of total assets, total book debt, book equity, and market equity, it was now time to create our subgroups and query data for them. The first one we worked on was the broker dealer dataset, which, as specified in the paper, included all primary dealers in our main dataset plus any firms with the SIC code 6211 or 6221. Using the historical linktable and our primary dealer linktable we created our subset and then used it to query financial data from Compustat. Now with our two different subsets of data, we merged them on the date key and then performed our ratio calculation. This calculation was the total value of primary dealers divided by the sum of the total value of primary dealers and the total value of non-primary dealer broker dealers. We then repeated this methodology for the banks comparison group which was generally comprised of firms with the SIC code 6020. We had to use backfill and forward fill on some of the data due to gaps. These gaps were most prevalent in Banks and the period of 1960 to 1990.
-\par
+\clearpage
 
 
     \begin{table}[htbp]
@@ -127,12 +127,12 @@ Period &  &  &  &  &  &  &  &  &  &  &  &  \\
 
     \end{table}
     
-\par
-In the graphs below, we can see each of the four ratios shown over the original timeframe of 1960 to 2012 and the updated timeframe of 1960 to 2024.\par
+\clearpage
+In the graphs below, we can see each of the four ratios shown over the original timeframe of 1960 to 2012 and the updated timeframe of 1960 to 2024.\clearpage
 
-\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{table02_figure.png}\end{figure}\par
-\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{updated_table02_figure.png}\end{figure}\par
-\par
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{table02_figure.png}\end{figure}\clearpage
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{updated_table02_figure.png}\end{figure}\clearpage
+\clearpage
 
 Table 3 shows the pairwise correlations between various capital ratios and macroeconomic indicators over the sample period from Q1 1970 to Q4 2012, using the data from CRSP-Compustat, Datastream, and several macroeconomic databases. 
 
@@ -146,7 +146,7 @@ Next, we processed macroeconomic indicators such as earnings-to-price ratio (E/P
 
 Finally, we calibrated Panel A and B correlations to examine the relationships between the intermediary capital ratios and macroeconomic variables. Panel A focuses on the levels of financial ratios and macroeconomic variables, and Panel B focuses on the factors derived from the financial ratios and their growth rates. We summarize our findings into tables for Panel A and B, alongside a figure illustrating how the capital ratios have shifted over time. All time series are standardized to zero mean and unit variance for illustration. We get our final table, which is converted to LaTeX and outputted to a .tex file.
 
-\par
+\clearpage
 
 
     \begin{table}[htbp]
@@ -226,16 +226,16 @@ Market volatility growth & -0.1 & 0.03 & -0.1 \\
     \end{adjustbox}
     \end{table}
     
-\par
+\clearpage
 
 In the graphs below, we can see the time series trend of the intermediary capital ratios and AEM leverage, over the original timeframe of 1960 to 2012 and the updated timeframe of 1960 to 2024. All time-series are standardized to zero mean and unit variance.
 
-\par
+\clearpage
 
-\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{table03_figure.png}\end{figure}\par
-\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{updated_table03_figure.png}\end{figure}\par
-\par
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{table03_figure.png}\end{figure}\clearpage
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{updated_table03_figure.png}\end{figure}\clearpage
+\clearpage
 This project of replication proved to be a fruitful endeavor. The most beneficial parts of this project were all of important computing concepts we used. We learned a lot about virtual environments, dependencies, command line, version control, and more. In addition, we were able to get some practice trying to replicating some somewhat complicated financial data, which will also be useful in our careers.
-Going forward we are going to have a better idea of how to approach a project for our employers because we understand how important and difficult automation can be and things such as dependency management - this will make us more aware of these problems as we encounter them in the workplace.\par
+Going forward we are going to have a better idea of how to approach a project for our employers because we understand how important and difficult automation can be and things such as dependency management - this will make us more aware of these problems as we encounter them in the workplace.\clearpage
 
 \end{document}
