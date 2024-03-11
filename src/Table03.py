@@ -12,7 +12,7 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 import Table03Load
 from Table03Load import quarter_to_date, date_to_quarter
 import Table03Analysis
-from Table02Prep import prim_deal_merge_manual_data_w_linktable
+import Table02Prep
 
 """
 Reads in manual dataset for primary dealers and holding companies and matches it with linkhist entry for company. 
@@ -25,13 +25,6 @@ Performs unit tests to observe similarity to original table as well as other sta
 def combine_bd_financials(UPDATED=False):
     """
     Combine broker & dealer financial data from historical sources and, if UPDATED, from more recent FRED data.
-
-    Parameters:
-    - data_dir (Path or str): Directory where the data is stored or should be saved.
-    - UPDATED (bool): Whether to include data from 2013 onwards.
-
-    Returns:
-    DataFrame: Combined broker & dealer financial assets and liabilities data.
     """
     
     # Load historical data (up to 2012) from local file or fetch if necessary
@@ -79,7 +72,7 @@ def prep_dataset(dataset, UPDATED=False):
 
 def calculate_ratios(data):
     """
-    Aggregates market cap ratio, book cap ratio, and AEM leverage for a given DataFrame.
+    Aggregates market cap ratio, book cap ratio, and AEM leverage ratio.
     """
     data['market_cap_ratio'] = data['market_equity'] / (data['book_debt'] + data['market_equity'])
     data['book_cap_ratio'] = data['book_equity'] / (data['book_debt'] + data['book_equity'])
@@ -108,7 +101,7 @@ def convert_ratios_to_factors(data):
     factors_df['market_capital_factor'] = factors_df['innovations_mkt_cap'] / data['market_cap_ratio'].shift(1)
     factors_df.drop(columns=['innovations_mkt_cap'], inplace=True)
 
-    # AR(1) for book capital ratio
+    # AR(1) with constant for market capital ratio
     cleaned_data = data['book_cap_ratio'].dropna()
     model = AutoReg(cleaned_data, lags=1, trend='c')
     model_fitted = model.fit()
@@ -279,25 +272,29 @@ def format_final_table(corrA, corrB):
 
 
 def convert_and_export_tables_to_latex(corrA, corrB, UPDATED=False):
-    # Fill NaN values with empty strings for both tables
-    
+    # Fill NaN values with empty strings for both tables    
     corrA = corrA.round(2).fillna('')
     corrB = corrB.round(2).fillna('')
     
+    # Define the caption based on whether the table is updated or not
+    if UPDATED:
+        caption = "Updated"
+    else:
+        caption = "Original"
+
     # Convert the correlation tables to LaTeX format without using to_latex() directly to control the structure
     # Define the column format and titles manually
     column_format = 'l' + 'c' * (len(corrA.columns))
     header_row = " & " + " & ".join(corrA.columns) + " \\\\"
     
-    # Generate content rows for Panel A
+    # Generate content rows for Panel A and B 
     panelA_rows = "\n".join([f"{index} & " + " & ".join(corrA.loc[index].astype(str)) + " \\\\" for index in corrA.index])
-    
-    # Generate content rows for Panel B, adjusting column names to match Panel A's format
     panelB_rows = "\n".join([f"{index} & " + " & ".join(corrB.loc[index].astype(str)) + " \\\\" for index in corrB.index])
     
     full_latex = rf"""
     \begin{{table}}[htbp]
     \centering
+    \caption{{\label{{tab:correlation}}{caption}}}
     \begin{{adjustbox}}{{max width=\textwidth}}
     \small
     \begin{{tabular}}{{{column_format}}}
@@ -335,7 +332,7 @@ def main(UPDATED=False):
 
     db = wrds.Connection(wrds_username=config.WRDS_USERNAME)
     
-    prim_dealers, _ = prim_deal_merge_manual_data_w_linktable(UPDATED=UPDATED)
+    prim_dealers, _ = Table02Prep.prim_deal_merge_manual_data_w_linktable(UPDATED=UPDATED)
     dataset, _ = Table03Load.fetch_data_for_tickers(prim_dealers, db)
     prep_datast = prep_dataset(dataset, UPDATED=UPDATED)
     ratio_dataset = aggregate_ratios(prep_datast)

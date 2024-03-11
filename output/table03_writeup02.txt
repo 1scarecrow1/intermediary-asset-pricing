@@ -1,0 +1,3 @@
+
+In the graphs below, we can see the time series trend of the intermediary capital ratios and AEM leverage, over the original timeframe of 1960 to 2012 and the updated timeframe of 1960 to 2024. All time-series are standardized to zero mean and unit variance.
+

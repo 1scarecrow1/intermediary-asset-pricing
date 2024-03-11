@@ -37,6 +37,7 @@ files = [
     # "table03_sstable.tex",
     "table03.tex",
     "updated_table03.tex",
+    "table03_writeup02.txt",
     "table03_figure.png",
     "updated_table03_figure.png",
     "conclusion.txt"

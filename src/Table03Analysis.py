@@ -88,6 +88,6 @@ def plot_figure02(ratios, UPDATED=False):
     # plt.show()
 
     if UPDATED:
-        plt.savefig('../output/updated_table03_figure02.png')
+        plt.savefig('../output/updated_table03_figure.png')
     else:
-        plt.savefig('../output/table03_figure02.png')
+        plt.savefig('../output/table03_figure.png')
