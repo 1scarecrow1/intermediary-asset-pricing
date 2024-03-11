@@ -30,6 +30,7 @@ df_combined.insert(3,'',np.nan)
 df_combined.fillna('',inplace=True)
 
 latex_table_string = df_combined.to_latex(index=False, escape=False)
+print(latex_table_string)
 
 path = OUTPUT_DIR / f'Table_A1_to_latex.tex'
 with open(path, "w") as text_file:
