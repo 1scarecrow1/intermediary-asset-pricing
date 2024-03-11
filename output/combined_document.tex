@@ -2,11 +2,11 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{geometry}
+\usepackage{xcolor}
 \geometry{left=1in, right=1in, top=1in, bottom=1in}
 \usepackage{adjustbox}
 \usepackage{booktabs}
 \begin{document}
-\usepackage{color}
 {
 \fontsize{12}{14}\selectfont
 \textnormal{Replicating} \textit{Intermediary asset pricing: New evidence from many asset classes}
@@ -18,12 +18,10 @@
 \fontsize{10}{12}\selectfont
 James, Young Jin Song, Jaehwa Youm, Monica Panigrahy, and Jacob Simeral
 }
-\clearpage
 
 For our project, we were tasked with replicating 4 tables from the paper Intermediary asset pricing: New evidence from many asset classes. This paper aims to show how shocks to the equity capital ratio of financial intermediaries, specifically Primary Dealer counterparties of the New York Federal Reserve, exhibit substantial explanatory power for cross-sectional variance in expected returns across diverse asset classes, indicating the pivotal role of intermediary capital risk factor in understanding asset pricing dynamics. We split our work up amongst our selves to accomplish this task. Jacob and Young Jin worked on Tables 1, 2, and A,1. Monica and Jaehwa worked on Table 03.
 We found some success in replicating some of the more recent numbers but found much difficulty in determining the exact methodology used by the original authors to determine which holding company to use. We had two different attempts at this, the first was to choose the holding company that held the primary dealer for the longest period of time in a specified period - this data is in ticks.csv. The second method was to use the current holding company for a given primary dealer - this data is in ticksv2.csv. The third, which we did not have time to do, would be to have sub-periods for each holding company of a given primary dealer, which would likely produce the most accurate results.
 To pull our data, we used the Compustat database through our WRDS subscription. Specifically, we used the quarterly fundamentals table from Compustat.
-\clearpage
 
 \clearpage
 Creation of Table 01 writeup:
@@ -32,7 +30,7 @@ The author sourced the historical list of primary dealers from the NY Fed's webs
 
 To replicate Table 1, we developed a code to automatically download the list of NY Fed primary dealers from the NYFed website, with an option to cache the list in an Excel file for future use. This cached list then serves as the starting point for the replication process.
 
-The replication begins with data from the Excel file, utilizing two worksheets: one listing the primary dealers as of February 2014 and another documenting all primary dealers from 1960 to 2014, including their start and end dates. We aligned the 2014 primary dealer list with their start dates, carefully addressing discrepancies between the two Excel sheets, such as extra spaces or punctuation differences.  For dealers that paused their operations and later resumed, we considered their most recent start date. The process includes adjustments for these variances to ensure alignment with the original table. Start dates are organized from the earliest to the most recent. The author manually matched dealers to their publicly-traded holding companies. For the replication, a 'ticks.csv' file was generated and stored in the 'data/manual' directory, containing the mapping between primary dealers and their holding companies. This mapping was then used to add an additional column to the 'mergeddf' table, showing the holding company for each dealer. Prior to transitioning to the LaTeX format, we conducted unit testing to verify the accuracy of 'Primary Dealer' names and 'Start Dates' in Table01.mergeddffinal. This involved removing spaces and periods and applying specific naming exceptions to ensure the data matched expected results. Exceptions included renaming 'Bank of Nova Scotia, New York Agency' to 'Bank of Nova Scotia, NY Agency' and abbreviating 'Merrill Lynch, Pierce, Fenner \textbackslash{}& Smith Incorporated' to 'Merrill Lynch, Pierce, Fenner \textbackslash{}& Smith'. Finally, we converted the table into LaTeX format using the tolatex() function, saving it in the output directory. This .tex file was then used to create the complete table in LaTeX format for inclusion in the report, replicating the entire table accurately.
+The replication begins with data from the Excel file, utilizing two worksheets: one listing the primary dealers as of February 2014 and another documenting all primary dealers from 1960 to 2014, including their start and end dates. We aligned the 2014 primary dealer list with their start dates, carefully addressing discrepancies between the two Excel sheets, such as extra spaces or punctuation differences.  For dealers that paused their operations and later resumed, we considered their most recent start date. The process includes adjustments for these variances to ensure alignment with the original table. Start dates are organized from the earliest to the most recent. The author manually matched dealers to their publicly-traded holding companies. For the replication, a 'ticks.csv' file was generated and stored in the 'data/manual' directory, containing the mapping between primary dealers and their holding companies. This mapping was then used to add an additional column to the 'mergeddf' table, showing the holding company for each dealer. Prior to transitioning to the LaTeX format, we conducted unit testing to verify the accuracy of 'Primary Dealer' names and 'Start Dates' in Table01.mergeddffinal. This involved removing spaces and periods and applying specific naming exceptions to ensure the data matched expected results. Exceptions included renaming 'Bank of Nova Scotia, New York Agency' to 'Bank of Nova Scotia, NY Agency' and abbreviating 'Merrill Lynch, Pierce, Fenner and Smith Incorporated' to 'Merrill Lynch, Pierce, Fenner and Smith'. Finally, we converted the table into LaTeX format using the tolatex() function, saving it in the output directory. This .tex file was then used to create the complete table in LaTeX format for inclusion in the report, replicating the entire table accurately.
 
 Replicating Table 1 was a straightforward task, with the main challenge being to resolve name discrepancies across two worksheets. These discrepancies arose from differences in spacing, punctuation, periods, abbreviations, and variations between lowercase and uppercase in the data sourced from the NY Fed website. After addressing these factors, Table 1 successfully matched with the original data.
 
@@ -47,7 +45,7 @@ Primary dealers, as designated by the NY Fed serve as its trading counterparties
 \begin{table}[!htbp]
 \centering
 \begin{adjustbox}{width=\textwidth,center}
-\input{\PathToOutput/Table_01_to_latex.tex}
+\input{Table_01_to_latex.tex}
 \end{adjustbox}
 \end{table}
 
@@ -75,7 +73,7 @@ entries that differ due to name changes but maintain continuity in primary deale
 
 \begin{table}[ht]
 \begin{adjustbox}{width=\textwidth}
-\input{\PathToOutput/Table_A1_to_latex.tex}
+\input{Table_A1_to_latex.tex}
 \end{adjustbox}
 \end{table}
 \clearpage
@@ -130,23 +128,36 @@ Period &  &  &  &  &  &  &  &  &  &  &  &  \\
 \clearpage
 In the graphs below, we can see each of the four ratios shown over the original timeframe of 1960 to 2012 and the updated timeframe of 1960 to 2024.\clearpage
 
-\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{table02_figure.png}\end{figure}\clearpage
-\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{updated_table02_figure.png}\end{figure}\clearpage
-\clearpage
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{table02_figure.png}\end{figure}\par
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{updated_table02_figure.png}\end{figure}\par
+\section*{Table 3: Pairwise Correlations}
 
-Table 3 shows the pairwise correlations between various capital ratios and macroeconomic indicators over the sample period from Q1 1970 to Q4 2012, using the data from CRSP-Compustat, Datastream, and several macroeconomic databases. 
+Table 3 shows the pairwise correlations between various capital ratios and macroeconomic indicators over the sample period from Q1 1970 to Q4 2012, using the data from CRSP-Compustat, Datastream, and several macroeconomic databases.
 
-The process of constructing Table 3 begins with the data from Table 2, ‘prim\textbackslash{}_deal\textbackslash{}_merge\textbackslash{}_manual\textbackslash{}_data\textbackslash{}_w\textbackslash{}_linktable,’ which assembles the comprehensive dataset for the primary dealers. This involves gathering the financial metrics—total assets, book equity, and market equity — to calculate the market and book capital ratios.  The dataset starts a year before 1970 to set the stage for the subsequent factor calculation and growth rate analyses.
+The process of constructing Table 3 begins with the data from Table 2, `prim\_deal\_merge\_manual\_data\_w\_linktable,' which assembles the comprehensive dataset for the primary dealers. This involves gathering the financial metrics—total assets, book equity, and market equity — to calculate the market and book capital ratios.  The dataset starts a year before 1970 to set the stage for the subsequent factor calculation and growth rate analyses.
 
 A key aspect of this paper is its engagement with the findings from Adrian-Etula-Muir (AEM), a paper highlighting the predictive power of broker-dealer leverage on stock market returns. Table 3 illustrates this engagement by including the AEM leverage factor as one of the major correlation variables. However, when we pulled the current FRED data, the numbers did not match those from the AEM paper. For instance, the total financial assets for the end of 2010.4Q, the AEM paper shows 2,075.1 billion dollars, whereas the current fred data shows 4,312.8 billion dollars. To account for the change in the metrics, we downloaded and used the dataset previously released for 1970-2012, which aligns with the AEM paper numbers.
 
-After the data preparation, we calculated the capital ratios and transformed these ratios into analytical factors, employing AR(1) innovations. Market and book capital factors were defined as AR(1) innovations to the capital ratio, scaled by the lagged capital ratio. The AEM metrics were defined separately; the AEM implied capital as the inverse of broker–dealer book leverage from Flow of Funds used in AEM, and the AEM leverage factor (LevFac) as the seasonally adjusted growth rate in broker–dealer book leverage. 
+After the data preparation, we calculated the capital ratios and transformed these ratios into analytical factors, employing AR(1) innovations. Market and book capital factors were defined as AR(1) innovations to the capital ratio, scaled by the lagged capital ratio. The AEM metrics were defined separately; the AEM implied capital as the inverse of broker–dealer book leverage from Flow of Funds used in AEM, and the AEM leverage factor (LevFac) as the seasonally adjusted growth rate in broker–dealer book leverage.
 
-Next, we processed macroeconomic indicators such as earnings-to-price ratio (E/P), unemployment rate, financial conditions index, Real GDP and GDP growth, market excess returns, and market volatility. The E/P ratio is downloaded from a Shiller dataset, with the URL containing the most recently updated data. The market excess return is fetched from Fama-French research datasets, calculated as SPY returns minus the risk-free rate. Like the ratio and factor datasets, the macro dataset begins from a year before 1970 for the subsequent factor and growth rate computations. 
+Next, we processed macroeconomic indicators such as earnings-to-price ratio (E/P), unemployment rate, financial conditions index, Real GDP and GDP growth, market excess returns, and market volatility. The E/P ratio is downloaded from a Shiller dataset, with the URL containing the most recently updated data. The market excess return is fetched from Fama-French research datasets, calculated as SPY returns minus the risk-free rate. Like the ratio and factor datasets, the macro dataset begins from a year before 1970 for the subsequent factor and growth rate computations.
 
 Finally, we calibrated Panel A and B correlations to examine the relationships between the intermediary capital ratios and macroeconomic variables. Panel A focuses on the levels of financial ratios and macroeconomic variables, and Panel B focuses on the factors derived from the financial ratios and their growth rates. We summarize our findings into tables for Panel A and B, alongside a figure illustrating how the capital ratios have shifted over time. All time series are standardized to zero mean and unit variance for illustration. We get our final table, which is converted to LaTeX and outputted to a .tex file.
-
-\clearpage
+\begin{table}
+\caption{The Chicago Fed National Financial Conditions Index (NFCI) starts from 1971. The others start from 1970.}
+\label{tab:Table 2.1}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+ & Market capital factor & Book capital factor & AEM leverage factor & E/P growth & Unemployment growth & Financial conditions growth & GDP growth & Market excess return & Market volatility growth \\
+\midrule
+count & 172.00 & 172.00 & 172.00 & 172.00 & 172.00 & 172.00 & 172.00 & 172.00 & 172.00 \\
+mean & -0.01 & -0.00 & 0.01 & -0.00 & 0.00 & -0.04 & 0.01 & 0.00 & -0.00 \\
+std & 0.26 & 0.11 & 0.19 & 0.07 & 0.05 & 0.77 & 0.01 & 0.04 & 1.65 \\
+min & -0.62 & -0.35 & -0.45 & -0.20 & -0.09 & -4.52 & -0.02 & -0.13 & -4.55 \\
+max & 1.61 & 0.62 & 1.66 & 0.31 & 0.23 & 2.21 & 0.04 & 0.11 & 4.49 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 
     \begin{table}[htbp]
@@ -178,7 +189,7 @@ Book capital factor &  & 1.0 & 0.1 \\
 AEM leverage factor &  &  & 1.0 \\
 Market excess return & 0.14 & 0.14 & -0.02 \\
 E/P growth & -0.35 & -0.01 & 0.28 \\
-Unemployment growth & 0.0 & 0.09 & 0.11 \\
+Unemployment growth & -0.0 & 0.13 & 0.11 \\
 GDP growth & -0.04 & -0.08 & -0.11 \\
 Financial conditions growth & -0.13 & 0.02 & 0.09 \\
 Market volatility growth & -0.09 & 0.05 & -0.11 \\
@@ -217,7 +228,7 @@ Book capital factor &  & 1.0 & 0.11 \\
 AEM leverage factor &  &  & 1.0 \\
 Market excess return & 0.17 & 0.13 & -0.01 \\
 E/P growth & -0.35 & -0.02 & 0.25 \\
-Unemployment growth & -0.02 & 0.02 & 0.08 \\
+Unemployment growth & -0.02 & 0.03 & 0.08 \\
 GDP growth & -0.0 & -0.04 & -0.08 \\
 Financial conditions growth & -0.1 & 0.03 & 0.08 \\
 Market volatility growth & -0.1 & 0.03 & -0.1 \\
@@ -232,8 +243,8 @@ In the graphs below, we can see the time series trend of the intermediary capita
 
 \clearpage
 
-\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{table03_figure.png}\end{figure}\clearpage
-\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{updated_table03_figure.png}\end{figure}\clearpage
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{table03_figure.png}\end{figure}\par
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{updated_table03_figure.png}\end{figure}\par
 \clearpage
 This project of replication proved to be a fruitful endeavor. The most beneficial parts of this project were all of important computing concepts we used. We learned a lot about virtual environments, dependencies, command line, version control, and more. In addition, we were able to get some practice trying to replicating some somewhat complicated financial data, which will also be useful in our careers.
 Going forward we are going to have a better idea of how to approach a project for our employers because we understand how important and difficult automation can be and things such as dependency management - this will make us more aware of these problems as we encounter them in the workplace.\clearpage

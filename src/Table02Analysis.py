@@ -22,6 +22,7 @@ def create_summary_stat_table_for_data(datasets, UPDATED=False):
         info.set_index(['Key', 'index'], inplace=True)
         summary_df = pd.concat([summary_df, info], axis=0)
     summary_df = summary_df.round(2) # update caption
+    summary_df.columns =  ['total assets', 'book debt', 'book equity', 'market equity']
     caption = 'There are significantly less entries for book equity than the other measures as shown in the count rows. There are also some negatives for book equity which is not present for other categories. '
     latex_table = summary_df.to_latex(index=True, multirow=True, multicolumn=True, escape=False, float_format="%.2f", caption=caption, label='tab:Table 2.1')
     latex_table = latex_table.replace(r'\multirow[t]{5}{*}', '')
