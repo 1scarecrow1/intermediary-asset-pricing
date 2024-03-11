@@ -110,7 +110,7 @@ def convert_ratios_to_factors(data):
 
     # AR(1) for book capital ratio
     cleaned_data = data['book_cap_ratio'].dropna()
-    model = AutoReg(cleaned_data, lags=1)
+    model = AutoReg(cleaned_data, lags=1, trend='c')
     model_fitted = model.fit()
     factors_df['innovations_book_cap'] = model_fitted.resid
     factors_df['book_capital_factor'] = factors_df['innovations_book_cap'] / data['book_cap_ratio'].shift(1)
