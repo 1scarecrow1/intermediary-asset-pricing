@@ -1,6 +1,9 @@
 from pathlib import Path
 import subprocess
 import os
+
+"""Combines multiple files from our project, like .txt, .tex, and .png into a single .tex document which is then converted to a pdf.
+"""
 # Define the base directory and output directory
 base_dir = Path('../output')
 output_file_path = base_dir / 'combined_document.tex'
@@ -11,6 +14,7 @@ latex_document = [
     "\\usepackage[utf8]{inputenc}",
     "\\usepackage{graphicx}",
     "\\usepackage{geometry}",
+    "\\usepackage{xcolor}",
     "\\geometry{left=1in, right=1in, top=1in, bottom=1in}",  # Adjust margins as needed
     "\\usepackage{adjustbox}",
     "\\usepackage{booktabs}",
@@ -31,8 +35,8 @@ files = [
     "table02_writeup02.txt",
     "table02_figure.png",
     "updated_table02_figure.png",
-    "table03_writeup01.txt",
-    # "table03_sstable.tex",
+    "table03_writeup01.tex",
+    "table03_sstable.tex",
     "table03.tex",
     "updated_table03.tex",
     "table03_writeup02.txt",

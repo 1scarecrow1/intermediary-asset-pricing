@@ -142,7 +142,7 @@ def task_compile_latex_docs():
 
     # Define the commands as lists
     compile_command = ["latexmk", "-pdf", "-pdflatex=xelatex %O %S", tex_file]
-    clean_command = ["latexmk", "-c"]
+    clean_command = ["latexmk", "-C"]
 
     def compile_tex():
         # Run the compile command in the tex_directory
@@ -153,7 +153,7 @@ def task_compile_latex_docs():
         subprocess.run(clean_command, cwd=tex_directory, check=True)
 
     return {
-        "actions": [compile_tex, clean_aux_files],
+        "actions": [clean_aux_files, compile_tex],
         "targets": [target_pdf],
         "file_dep": [os.path.join(tex_directory, tex_file)],
         "clean": True,
