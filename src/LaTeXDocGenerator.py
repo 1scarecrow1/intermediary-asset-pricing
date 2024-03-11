@@ -15,6 +15,7 @@ latex_document = [
     "\\usepackage{adjustbox}",
     "\\usepackage{booktabs}",
     "\\begin{document}",
+    "\\usepackage{color}"
 ]
 
 # List of files in the order to be included
@@ -22,9 +23,9 @@ files = [
     "title.tex",
     "intro.txt",
     "table01_writeup.txt",
-    "Table_01_to_latex.tex",
+    "Report_Table_01.tex",
     "tableA1_writeup.txt",
-    "Table_A1_to_latex.tex",
+    "Report_Table_A1.tex",
     "table02_writeup01.txt",
     # "table02_sstable.tex",
     "table02.tex",
