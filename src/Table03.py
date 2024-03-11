@@ -72,7 +72,7 @@ def prep_dataset(dataset, UPDATED=False):
 
 def calculate_ratios(data):
     """
-    Aggregates market cap ratio, book cap ratio, and AEM leverage ratio.
+    Calculates market cap ratio, book cap ratio, and AEM leverage ratio.
     """
     data['market_cap_ratio'] = data['market_equity'] / (data['book_debt'] + data['market_equity'])
     data['book_cap_ratio'] = data['book_equity'] / (data['book_debt'] + data['book_equity'])
@@ -83,6 +83,9 @@ def calculate_ratios(data):
 
 
 def aggregate_ratios(data):
+    """
+    Aggregates market cap ratio, book cap ratio, and AEM leverage ratio.
+    """
     data = calculate_ratios(data)
     data = data[['datafqtr', 'market_cap_ratio', 'book_cap_ratio', 'aem_leverage_ratio']]
     data.rename(columns={'datafqtr': 'date'}, inplace=True)
@@ -91,6 +94,10 @@ def aggregate_ratios(data):
 
 
 def convert_ratios_to_factors(data):
+    """
+    Converts ratios to analytical factors.
+    """
+
     factors_df = pd.DataFrame(index=data.index)
 
     # AR(1) with constant for market capital ratio
@@ -138,6 +145,7 @@ def macro_variables(db):
     Creates a table of macroeconomic variables to be used in the analysis.
     Note: The function starts gathering data from one year earlier than 1970 to allow for factor calculation where differences are used.
     """
+    # Load FRED macroeconomic data and resample quarterly
     macro_data = Table03Load.load_fred_macro_data()
     macro_data = macro_data.rename(columns={'UNRATE': 'unemp_rate',
                                     'NFCI': 'nfci',
@@ -148,17 +156,21 @@ def macro_variables(db):
     macro_data.rename(columns={'DATE': 'date'}, inplace=True)
     macro_quarterly = macro_data.resample('Q').mean()
 
+    # Load Shiller PE and calculate earnings-to-price ratio
     shiller_cape = Table03Load.load_shiller_pe()
     shiller_ep = calculate_ep(shiller_cape)
     shiller_quarterly = shiller_ep.resample('Q').mean()
 
+    # Fetch Fama-French factors and resample quarterly
     ff_facs = Table03Load.fetch_ff_factors(start_date='19690101', end_date='20240229')
     ff_facs_quarterly = ff_facs.to_timestamp(freq='M').resample('Q').last()
 
+    # Pull CRSP Value Weighted Index and calculate quarterly market volatility
     value_wtd_indx = Table03Load.pull_CRSP_Value_Weighted_Index(db)
     value_wtd_indx['date'] = pd.to_datetime(value_wtd_indx['date'])
     annual_vol_quarterly = value_wtd_indx.set_index('date')['vwretd'].pct_change().groupby(pd.Grouper(freq='Q')).std().rename('mkt_vol')
 
+    # Merge all macroeconomic data
     macro_merged = shiller_quarterly.merge(macro_quarterly, left_index=True, right_index=True, how='left')
     macro_merged = macro_merged.merge(ff_facs_quarterly[['mkt_ret']],left_index=True, right_index=True)
     macro_merged = macro_merged.merge(annual_vol_quarterly, left_index=True, right_index=True)
@@ -175,6 +187,7 @@ def create_panelA(ratios, macro):
         'book_cap_ratio': 'Book capital',
         'aem_leverage_ratio': 'AEM leverage'
     })
+
     macro = macro[['e/p', 'unemp_rate', 'nfci', 'real_gdp', 'mkt_ret', 'mkt_vol']]
     macro_renamed = macro.rename(columns={
         'e/p': 'E/P',
@@ -203,6 +216,7 @@ def create_panelB(factors, macro):
         'book_capital_factor': 'Book capital factor',
         'aem_leverage_factor': 'AEM leverage factor'})
     
+    # Calculate quarterly growth rates of macroeconomic variables
     macro_growth = np.log(macro / macro.shift(1))
     macro_growth = macro_growth.fillna(0)
     macro_growth = macro_growth.loc['1970-01-01':]
@@ -227,11 +241,17 @@ def create_panelB(factors, macro):
 
 
 def format_correlation_matrix(corr_matrix):
+    """
+    Formats the correlation matrix by masking the lower triangle.
+    """
     corr_matrix = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=0).astype(np.bool_))
     return corr_matrix
 
 
 def calculate_correlation_panelA(panelA):
+    """
+    Calculates the correlation for Panel A (capital ratio levels).
+    """
     correlation_panelA = format_correlation_matrix(panelA.iloc[:, :3].corr())
     main_cols = panelA[['Market capital', 'Book capital', 'AEM leverage']]
     other_cols = panelA[['E/P', 'Unemployment', 'GDP', 'Financial conditions', 'Market volatility']]
@@ -244,6 +264,9 @@ def calculate_correlation_panelA(panelA):
 
 
 def calculate_correlation_panelB(panelB):
+    """
+    Calculates the correlation for Panel B (capital ratio factors).
+    """
     correlation_panelB = format_correlation_matrix(panelB.iloc[:, :3].corr())
     main_cols = panelB[['Market capital factor', 'Book capital factor', 'AEM leverage factor']]
     other_cols = panelB[['Market excess return', 'E/P growth', 'Unemployment growth', 'GDP growth', 'Financial conditions growth', 'Market volatility growth']]
@@ -256,6 +279,9 @@ def calculate_correlation_panelB(panelB):
 
 
 def format_final_table(corrA, corrB):
+    """
+    Format the final correlation table.
+    """
     panelB_renamed = corrB.copy()
     panelB_renamed.columns = corrA.columns
 
@@ -272,6 +298,9 @@ def format_final_table(corrA, corrB):
 
 
 def convert_and_export_tables_to_latex(corrA, corrB, UPDATED=False):
+    """
+    Convert correlation tables to LaTeX format and export to a .tex file.
+    """
     # Fill NaN values with empty strings for both tables    
     corrA = corrA.round(2).fillna('')
     corrB = corrB.round(2).fillna('')

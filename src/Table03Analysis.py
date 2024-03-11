@@ -8,20 +8,26 @@ Is referenced by Table03. Creates tables to understand the data and figures to u
 """
 
 def create_summary_stat_table_for_data(dataset, UPDATED=False):
+    """
+    Creates a summary statistics table for the dataset.
+    """
     summary_df = pd.DataFrame()
     info = dataset.describe()
     info = info.drop(['25%', '50%', '75%'])
     summary_df = pd.concat([summary_df, info], axis=0)
     
-    caption = 'The Chicago Fed National Financial Conditions Index (NFCI) starts from 1971. The others start from 1970.'
+    caption = "Summary statistics of capital factors and macro variables"
+
     latex_table = summary_df.to_latex(index=True, multirow=True, multicolumn=True, escape=False, float_format="%.2f", caption=caption, label='tab:Table 2.1')
     latex_table = latex_table.replace(r'\multirow[t]{5}{*}', '')
+
     if UPDATED:
         with open('../output/updated_table03_sstable.tex', 'w') as f:
             f.write(latex_table)
     else:
         with open('../output/table03_sstable.tex', 'w') as f:
             f.write(latex_table)
+
     
 
 # For plotting Figure 1 and 2 
