@@ -95,6 +95,7 @@ def aggregate_ratios(data):
     data = data.set_index('date')
     return data
 
+
 def convert_ratios_to_factors(data):
     factors_df = pd.DataFrame(index=data.index)
 
@@ -194,6 +195,7 @@ def create_panelA(ratios, macro):
     ordered_columns= ['Market capital', 'Book capital', 'AEM leverage',
                         'E/P', 'Unemployment', 'Financial conditions', 'GDP', 'Market excess return', 'Market volatility']
     panelA = panelA[ordered_columns]
+    panelA = panelA.loc['1970-01-01':]
     
     return panelA
 
@@ -225,6 +227,8 @@ def create_panelB(factors, macro):
     ordered_columns = ['Market capital factor', 'Book capital factor', 'AEM leverage factor',
                        'E/P growth', 'Unemployment growth', 'Financial conditions growth', 'GDP growth', 'Market excess return', 'Market volatility growth']
     panelB = panelB[ordered_columns]
+    panelB = panelB.loc['1970-01-01':]  
+
     return panelB                      
 
 
@@ -233,10 +237,10 @@ def format_correlation_matrix(corr_matrix):
     return corr_matrix
 
 
-def calculate_correlation_panelA(levels2):
-    correlation_panelA = format_correlation_matrix(levels2.iloc[:, :3].corr())
-    main_cols = levels2[['Market capital', 'Book capital', 'AEM leverage']]
-    other_cols = levels2[['E/P', 'Unemployment', 'GDP', 'Financial conditions', 'Market volatility']]
+def calculate_correlation_panelA(panelA):
+    correlation_panelA = format_correlation_matrix(panelA.iloc[:, :3].corr())
+    main_cols = panelA[['Market capital', 'Book capital', 'AEM leverage']]
+    other_cols = panelA[['E/P', 'Unemployment', 'GDP', 'Financial conditions', 'Market volatility']]
     
     correlation_results_panelA = pd.DataFrame(index=main_cols.columns)
     for column in other_cols.columns:
@@ -245,10 +249,10 @@ def calculate_correlation_panelA(levels2):
     return pd.concat([correlation_panelA, correlation_results_panelA.T], axis=0)
 
 
-def calculate_correlation_panelB(panelA):
-    correlation_panelB = format_correlation_matrix(panelA.iloc[:, :3].corr())
-    main_cols = panelA[['Market capital factor', 'Book capital factor', 'AEM leverage factor']]
-    other_cols = panelA[['Market excess return', 'E/P growth', 'Unemployment growth', 'GDP growth', 'Financial conditions growth', 'Market volatility growth']]
+def calculate_correlation_panelB(panelB):
+    correlation_panelB = format_correlation_matrix(panelB.iloc[:, :3].corr())
+    main_cols = panelB[['Market capital factor', 'Book capital factor', 'AEM leverage factor']]
+    other_cols = panelB[['Market excess return', 'E/P growth', 'Unemployment growth', 'GDP growth', 'Financial conditions growth', 'Market volatility growth']]
     
     correlation_results_panelB = pd.DataFrame(index=main_cols.columns)
     for column in other_cols.columns:
@@ -323,12 +327,9 @@ def convert_and_export_tables_to_latex(corrA, corrB, UPDATED=False):
             f.write(full_latex)
 
 
-
 def main(UPDATED=False):
     """
     Main function to execute the entire data processing pipeline.
-    Returns:
-    - formatted_table (pandas.DataFrame): DataFrame containing the formatted table.
     """
 
     db = wrds.Connection(wrds_username=config.WRDS_USERNAME)
@@ -341,16 +342,17 @@ def main(UPDATED=False):
     macro_dataset = macro_variables(db)
     panelA = create_panelA(ratio_dataset, macro_dataset)
     panelB = create_panelB(factors_dataset, macro_dataset)
+
     Table03Analysis.create_summary_stat_table_for_data(panelB, UPDATED=UPDATED)
+    Table03Analysis.plot_figure02(ratio_dataset, UPDATED=UPDATED)
 
     correlation_panelA = calculate_correlation_panelA(panelA)
     correlation_panelB = calculate_correlation_panelB(panelB)
     formatted_table = format_final_table(correlation_panelA, correlation_panelB)
     convert_and_export_tables_to_latex(correlation_panelA, correlation_panelB, UPDATED=UPDATED)
-
     print(formatted_table.style.format(na_rep=''))
 
 
 if __name__ == "__main__":
-    main(UPDATED=True)
+    main(UPDATED=False)
     print("Table 03 has been created and exported to LaTeX format.")
