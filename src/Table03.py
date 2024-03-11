@@ -16,9 +16,9 @@ import Table02Prep
 
 """
 Reads in manual dataset for primary dealers and holding companies and matches it with linkhist entry for company. 
+Calculates the market capital ratio, book capital ratio, and AEM leverage ratio and the correlation of these ratios with macroeconomic variables.
 Compiles and prepares this data to produce Table 03 from intermediary asset pricing paper in LaTeX format.
 Also creates a summary statistics table and figure in LaTeX format.
-Performs unit tests to observe similarity to original table as well as other standard tests.
 """
 
 

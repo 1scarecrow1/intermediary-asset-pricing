@@ -1,6 +1,10 @@
 import pandas as pd
 import Table_01
 
+"""
+Tests for Table_01.py
+"""
+
 def test_primary_dealer_start_dates(merged_df_final):
     """
     Test that the 'Primary Dealer' names (with spaces and periods removed and specific naming exceptions handled) 
