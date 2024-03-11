@@ -10,9 +10,8 @@ from pathlib import Path
 
 from load_fred import *
 
-
 """
-Functions that pull and prepare the data for Table 03 in the intermediary asset pricing paper.
+Functions that pull and prepare the data for Table 03.
 """
 
 DATA_DIR = Path(config.DATA_DIR)
@@ -43,10 +42,13 @@ def fetch_financial_data_quarterly(gvkey, start_date, end_date, db):
     """
     Fetch financial data for a given ticker and date range from the CCM database in WRDS.
     
-    :param gvkey: The gvkey symbol for the company.
-    :param start_date: The start date for the data in YYYY-MM-DD format.
-    :param end_date: The end date for the data in YYYY-MM-DD format or 'Current'.
-    :return: A DataFrame containing the financial data.
+    Parameters:
+    gvkey: The gvkey symbol for the company.
+    start_date: The start date for the data in YYYY-MM-DD format.
+    end_date: The end date for the data in YYYY-MM-DD format or 'Current'.
+    
+    Returns:
+    A DataFrame containing the financial data.
     """
 
     if not gvkey:  # Skip if no ticker is available
@@ -212,14 +214,6 @@ def fetch_ff_factors(start_date, end_date):
     """
     Fetches Fama-French research data factors, adjusts dates to end of the month,
     resamples to quarterly frequency, and renames columns for ease of use.
-    
-    Parameters:
-    - start_date (str): The start date for fetching data in 'YYYYMMDD' format.
-    - end_date (str): The end date for fetching data in 'YYYYMMDD' format.
-    
-    Returns:
-    - DataFrame: A DataFrame containing the Fama-French factors, resampled quarterly,
-                 with 'Mkt-RF' column renamed to 'mkt_ret'.
     """
     rawdata = web.DataReader('F-F_Research_Data_5_Factors_2x3', data_source='famafrench', start=start_date, end=end_date)
     ff_facs = rawdata[0] / 100
@@ -265,13 +259,6 @@ def load_shiller_pe(url=URL_SHILLER, data_dir=DATA_DIR, from_cache=True):
 def pull_CRSP_Value_Weighted_Index(db):
     """
     Pulls a value-weighted stock index from the CRSP database.
-
-    Returns:
-    - pandas.DataFrame: DataFrame containing the value-weighted stock index data.
-
-    Note:
-    This function executes a SQL query to retrieve the value-weighted stock index data from CRSP. 
-    The returned DataFrame includes columns for 'date' and 'vwretd' (value-weighted return including dividends).
     """
     sql_query = """
         SELECT date, vwretd

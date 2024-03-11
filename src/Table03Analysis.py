@@ -3,9 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-
 """
-Is referenced by Table03Prep. Creates tables to understand the data and figures to understand the different ratios.
+Is referenced by Table03. Creates tables to understand the data and figures to understand the different ratios.
 """
 
 def create_summary_stat_table_for_data(dataset, UPDATED=False):

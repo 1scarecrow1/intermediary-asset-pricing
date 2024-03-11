@@ -7,6 +7,10 @@ import numpy as np
 import Table02Prep
 import Table03Load
 
+"""
+Tests for Table03.py
+"""
+
 class TestFormattedTable(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
