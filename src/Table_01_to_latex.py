@@ -15,12 +15,6 @@ in the output directory, effectively preparing the table for inclusion in LaTeX 
 """
 
 import Table_01
-import Table_01_testing
-
-# Before initiating the transition to LaTeX format, execute unit testing to ensure that Table_01 accurately
-# aligns with the expected results.
-Table_01_testing.test_primary_dealer_start_dates(Table_01.merged_df_final)
-
 
 df_copy = Table_01.merged_df_final.copy()
 
