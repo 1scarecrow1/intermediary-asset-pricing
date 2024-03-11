@@ -33,8 +33,11 @@ files = [
     "table02_figure.png",
     "updated_table02_figure.png",
     "table03_writeup01.txt",
+    # "table03_sstable.tex",
     "table03.tex",
     "updated_table03.tex",
+    "table03_figure.png",
+    "updated_table03_figure.png",
     "conclusion.txt"
 ]
 def escape_latex_special_chars(text):
