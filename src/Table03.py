@@ -9,7 +9,8 @@ import numpy as np
 from statsmodels.tsa.ar_model import AutoReg
 from statsmodels.tsa.seasonal import seasonal_decompose
 
-from Table03Load import *
+import Table03Load
+from Table03Load import quarter_to_date, date_to_quarter
 import Table03Analysis
 from Table02Prep import prim_deal_merge_manual_data_w_linktable
 
@@ -21,7 +22,7 @@ Performs unit tests to observe similarity to original table as well as other sta
 """
 
 
-def combine_bd_financials(data_dir=DATA_DIR, UPDATED=False):
+def combine_bd_financials(UPDATED=False):
     """
     Combine broker & dealer financial data from historical sources and, if UPDATED, from more recent FRED data.
 
@@ -34,12 +35,12 @@ def combine_bd_financials(data_dir=DATA_DIR, UPDATED=False):
     """
     
     # Load historical data (up to 2012) from local file or fetch if necessary
-    bd_financials_historical = load_fred_past(data_dir=data_dir)
+    bd_financials_historical = Table03Load.load_fred_past()
     bd_financials_historical.index = pd.to_datetime(bd_financials_historical.index)
     
     if UPDATED:
         # Load recent data
-        bd_financials_recent = load_bd_financials()  
+        bd_financials_recent = Table03Load.load_bd_financials()  
         bd_financials_recent.index = pd.to_datetime(bd_financials_recent.index)
         start_date = pd.to_datetime("2012-12-31")
         bd_financials_recent = bd_financials_recent[bd_financials_recent.index > start_date]
@@ -144,7 +145,7 @@ def macro_variables(db):
     Creates a table of macroeconomic variables to be used in the analysis.
     Note: The function starts gathering data from one year earlier than 1970 to allow for factor calculation where differences are used.
     """
-    macro_data = load_fred_macro_data()
+    macro_data = Table03Load.load_fred_macro_data()
     macro_data = macro_data.rename(columns={'UNRATE': 'unemp_rate',
                                     'NFCI': 'nfci',
                                     'GDPC1': 'real_gdp',
@@ -154,14 +155,14 @@ def macro_variables(db):
     macro_data.rename(columns={'DATE': 'date'}, inplace=True)
     macro_quarterly = macro_data.resample('Q').mean()
 
-    shiller_cape = load_shiller_pe()
+    shiller_cape = Table03Load.load_shiller_pe()
     shiller_ep = calculate_ep(shiller_cape)
     shiller_quarterly = shiller_ep.resample('Q').mean()
 
-    ff_facs = fetch_ff_factors(start_date='19690101', end_date='20240229')
+    ff_facs = Table03Load.fetch_ff_factors(start_date='19690101', end_date='20240229')
     ff_facs_quarterly = ff_facs.to_timestamp(freq='M').resample('Q').last()
 
-    value_wtd_indx = pull_CRSP_Value_Weighted_Index(db)
+    value_wtd_indx = Table03Load.pull_CRSP_Value_Weighted_Index(db)
     value_wtd_indx['date'] = pd.to_datetime(value_wtd_indx['date'])
     annual_vol_quarterly = value_wtd_indx.set_index('date')['vwretd'].pct_change().groupby(pd.Grouper(freq='Q')).std().rename('mkt_vol')
 
@@ -233,7 +234,7 @@ def create_panelB(factors, macro):
 
 
 def format_correlation_matrix(corr_matrix):
-    corr_matrix = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(np.bool_))
+    corr_matrix = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=0).astype(np.bool_))
     return corr_matrix
 
 
@@ -335,7 +336,7 @@ def main(UPDATED=False):
     db = wrds.Connection(wrds_username=config.WRDS_USERNAME)
     
     prim_dealers, _ = prim_deal_merge_manual_data_w_linktable(UPDATED=UPDATED)
-    dataset, _ = fetch_data_for_tickers(prim_dealers, db)
+    dataset, _ = Table03Load.fetch_data_for_tickers(prim_dealers, db)
     prep_datast = prep_dataset(dataset, UPDATED=UPDATED)
     ratio_dataset = aggregate_ratios(prep_datast)
     factors_dataset = convert_ratios_to_factors(ratio_dataset)
@@ -350,8 +351,8 @@ def main(UPDATED=False):
     correlation_panelB = calculate_correlation_panelB(panelB)
     formatted_table = format_final_table(correlation_panelA, correlation_panelB)
     convert_and_export_tables_to_latex(correlation_panelA, correlation_panelB, UPDATED=UPDATED)
-    print(formatted_table.style.format(na_rep=''))
-
+    return print(formatted_table.style.format(na_rep=''))
+    
 
 if __name__ == "__main__":
     main(UPDATED=False)
