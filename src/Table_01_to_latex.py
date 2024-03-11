@@ -7,12 +7,20 @@ DATA_DIR = Path(config.DATA_DIR)
 OUTPUT_DIR = Path(config.OUTPUT_DIR)
 
 """
-By importing Table_01.py into this script, the process begins with modifying the DataFrame to replace '&' 
-with '\&' throughout, ensuring LaTeX format compatibility. After this adjustment, the script proceeds to  
-create 'Table_01_to_latex.tex' in the output directory, effectively preparing the table for LaTeX inclusion.
+Before initiating the transition to LaTeX format, execute unit testing to ensure that Table_01 accurately 
+aligns with the expected results. After confirming the accuracy, by importing Table_01.py into this script, 
+the process begins. The initial step involves modifying the DataFrame to replace '&' with '\&' throughout, 
+ensuring compatibility with LaTeX format. Subsequently, the script proceeds to create Table_01_to_latex.tex 
+in the output directory, effectively preparing the table for inclusion in LaTeX documents.
 """
 
 import Table_01
+import Table_01_testing
+
+# Before initiating the transition to LaTeX format, execute unit testing to ensure that Table_01 accurately
+# aligns with the expected results.
+Table_01_testing.test_primary_dealer_start_dates(Table_01.merged_df_final)
+
 
 df_copy = Table_01.merged_df_final.copy()
 

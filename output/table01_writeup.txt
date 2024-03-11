@@ -1,1 +1,42 @@
-table01 writeup
+Creation of Table 01 writeup:
+
+1. The author sourced the historical list of primary dealers from the NY Fed's website, 
+matching these dealers with data on their publicly-traded holding companies from CRSP/
+Compustat for U.S. dealers or Datastream for foreign dealers. Table 1 presents primary 
+dealer designations as of February 11, 2014.
+
+2. To replicate Table 1, we developed a code to automatically download the list of NY Fed 
+primary dealers from the NYFed website, with an option to cache the list in an Excel file 
+for future use. This cached list then serves as the starting point for the replication process.
+
+3-1. The replication begins with data from the Excel file, utilizing two worksheets: one listing 
+the primary dealers as of February 2014 and another documenting all primary dealers from 1960 to 2014, 
+including their start and end dates. 
+
+3-2. We aligned the 2014 primary dealer list with their start dates, carefully addressing discrepancies 
+between the two Excel sheets, such as extra spaces or punctuation differences.  For dealers that paused 
+their operations and later resumed, we considered their most recent start date. The process includes 
+adjustments for these variances to ensure alignment with the original table. Start dates are organized 
+from the earliest to the most recent. 
+
+3-3. The author manually matched dealers to their publicly-traded holding companies. For the replication, 
+a 'ticks.csv' file was generated and stored in the 'data/manual' directory, containing the mapping between 
+primary dealers and their holding companies. This mapping was then used to add an additional column to the 
+'merged_df' table, showing the holding company for each dealer.
+
+4-1. Prior to transitioning to the LaTeX format, we conducted unit testing to verify the accuracy of 'Primary 
+Dealer' names and 'Start Dates' in Table_01.merged_df_final. This involved removing spaces and periods and 
+applying specific naming exceptions to ensure the data matched expected results.
+
+4-2. Exceptions included renaming 'Bank of Nova Scotia, New York Agency' to 'Bank of Nova Scotia, NY Agency' 
+and abbreviating 'Merrill Lynch, Pierce, Fenner & Smith Incorporated' to 'Merrill Lynch, Pierce, Fenner & Smith'.
+
+5. Finally, we converted the table into LaTeX format using the to_latex() function, saving it in the output directory.
+This .tex file was then used to create the complete table in LaTeX format for inclusion in the report, replicating the
+entire table accurately.
+
+6. Replicating Table 1 was a straightforward task, with the main challenge being to resolve name discrepancies across 
+two worksheets. These discrepancies arose from differences in spacing, punctuation, periods, abbreviations, and 
+variations between lowercase and uppercase in the data sourced from the NY Fed website. After addressing these factors, 
+Table 1 successfully matched with the original data.
+

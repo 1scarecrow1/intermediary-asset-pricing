@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 """
-Is referenced by Table02Prep. Creates tables to understand the data and figures to understand the different ratios.
+Is referenced by Table03Prep. Creates tables to understand the data and figures to understand the different ratios.
 """
+
 def create_summary_stat_table_for_data(datasets, UPDATED=False):
     summary_df = pd.DataFrame()
     for key in datasets.keys():
@@ -21,16 +22,31 @@ def create_summary_stat_table_for_data(datasets, UPDATED=False):
         info['Key'] = key
         info.set_index(['Key', 'index'], inplace=True)
         summary_df = pd.concat([summary_df, info], axis=0)
+
     summary_df = summary_df.round(2) # update caption
     caption = 'There are significantly less entries for book equity than the other measures as shown in the count rows. There are also some negatives for book equity which is not present for other categories. '
     latex_table = summary_df.to_latex(index=True, multirow=True, multicolumn=True, escape=False, float_format="%.2f", caption=caption, label='tab:Table 2.1')
     latex_table = latex_table.replace(r'\multirow[t]{5}{*}', '')
     if UPDATED:
-        with open('../output/updated_table02_sstable.tex', 'w') as f:
+        with open('../output/updated_table03_sstable.tex', 'w') as f:
             f.write(latex_table)
     else:
-        with open('../output/table02_sstable.tex', 'w') as f:
+        with open('../output/table03_sstable.tex', 'w') as f:
             f.write(latex_table)
+
+
+# For plotting Figure 1 
+def standardize_ratios_and_factors(data):
+    """
+    Automatically standardizes columns that end with "ratio" in a given DataFrame
+    """
+    columns_to_standardize = [col for col in data.columns if col.endswith('ratio') or col.endswith('factor')]
+    for col in columns_to_standardize:
+        standardized_col_name = f'{col}_std'
+        data[standardized_col_name] = (data[col] - data[col].mean()) / data[col].std()
+
+    return data
+
 
 def create_figure_for_data(ratios_dict, UPDATED=False):
     concatenated_df = pd.concat([s.rename(f"{key}_{s.name}") for key, s in ratios_dict.items()], axis=1)
@@ -69,9 +85,8 @@ def create_figure_for_data(ratios_dict, UPDATED=False):
         ax.set_ylabel('Value')  # Set y-axis label for each subplot
         # Add caption
     time = datetime.now()
-    caption = str(
-        time) + ': From the plots above we can observe the trends of the ratios for each comparison group over time. Keep in mind that we have filled in missing values to make the lines display properly.'
-    fig.text(0.5, -0.1, caption, ha='center', fontsize=8)
+    fig.text(0.5, -0.05, str(time) + ': From the plots above we can observe the trends of the ratios for each comparison group over time. Keep in mind that we have filled in missing values to make the lines display properly.', ha='center', fontsize=8)
+    plt.tight_layout()
     if UPDATED:
         plt.savefig('../output/updated_table02_figure.png')
     else:
