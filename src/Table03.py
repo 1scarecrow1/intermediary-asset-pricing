@@ -100,7 +100,7 @@ def aggregate_ratios(data):
 def convert_ratios_to_factors(data):
     factors_df = pd.DataFrame(index=data.index)
 
-    # AR(1) for market capital ratio
+    # AR(1) with constant for market capital ratio
     cleaned_data = data['market_cap_ratio'].dropna()
     model = AutoReg(cleaned_data, lags=1, trend='c')
     model_fitted = model.fit()
